@@ -4,14 +4,15 @@ import { ERC20 } from '../types/Factory/ERC20'
 import { ERC20 as ERC20Telmplate } from '../types/templates/Pair/ERC20'
 import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
-import { Bundle, LiquidityPosition, MooniswapFactory, Pair, Token, User } from '../types/schema'
+import { Bundle, LiquidityPosition, EmiswapFactory, Pair, Token, User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
 import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD } from './pricing'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
-export const FACTORY_ADDRESS = '0x54F3282EEC0A18d5a07bb72bad8a5ea00026c0B1'
-export const ETH_BALANCE_CONTRACT = '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
+export const FACTORY_ADDRESS = '0x8F48DB4073764Ed5242d9E72027399412407CEAE'
+// on mainnet -> export const ETH_BALANCE_CONTRACT = '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
+export const ETH_BALANCE_CONTRACT = '0x0f97019Ea8577E1caD3ACf9D6Db13074DeEFf39f'
 
 export let ZERO_BI = BigInt.fromI32(0)
 export let ONE_BI = BigInt.fromI32(1)
@@ -191,11 +192,11 @@ export function handleSync(pairAddress: Address): void {
   let pair = Pair.load(pairAddress.toHex())
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
-  let mooniswap = MooniswapFactory.load(FACTORY_ADDRESS)
+  let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
   let reserves = fetchReserves(pair.id)
 
   // reset factory liquidity by subtracting only tracked liquidity
-  mooniswap.totalLiquidityETH = mooniswap.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
+  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
 
   pair.reserve0 = convertTokenToDecimal(reserves[0], token0.decimals)
   pair.reserve1 = convertTokenToDecimal(reserves[1], token1.decimals)
@@ -231,15 +232,15 @@ export function handleSync(pairAddress: Address): void {
   pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
 
   // use tracked amounts globally
-  mooniswap.totalLiquidityETH = mooniswap.totalLiquidityETH.plus(trackedLiquidityETH)
-  mooniswap.totalLiquidityUSD = mooniswap.totalLiquidityETH.times(bundle.ethPrice)
+  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(trackedLiquidityETH)
+  emiswap.totalLiquidityUSD = emiswap.totalLiquidityETH.times(bundle.ethPrice)
 
   // save entities
   pair.save()
-  mooniswap.save()
+  emiswap.save()
 }
 
-export function getMooniswapFee(): BigInt {
+export function getEmiswapFee(): BigInt {
   let contract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
   return contract.fee()
 }

@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
-import { updatePairDayData, updatePairHourData, updateTokenDayData, updateMooniswapDayData } from './dayUpdates'
+import { updatePairDayData, updatePairHourData, updateTokenDayData, updateEmiswapDayData } from './dayUpdates'
 import { getTrackedVolumeUSD } from './pricing'
 import {
   ADDRESS_ZERO,
@@ -9,7 +9,7 @@ import {
   createLiquidityPosition,
   createUser,
   FACTORY_ADDRESS,
-  fetchReserves, getMooniswapFee,
+  fetchReserves, getEmiswapFee,
   handleSync, ONE_BD,
   ONE_BI,
   ZERO_BD
@@ -19,8 +19,8 @@ import {
   Bundle,
   Burn,
   Mint,
-  MooniswapDayData,
-  MooniswapFactory,
+  EmiswapDayData,
+  EmiswapFactory,
   Pair,
   PairDayData,
   Swap,
@@ -32,7 +32,7 @@ import { Deposited, Pair as PairContract, Swapped, Withdrawn } from '../types/te
 
 export function handleTransfer(event: Transfer): void {
 
-  let factory = MooniswapFactory.load(FACTORY_ADDRESS)
+  let factory = EmiswapFactory.load(FACTORY_ADDRESS)
   let transactionHash = event.transaction.hash.toHexString()
 
   // user stats
@@ -222,7 +222,7 @@ export function handleMint(event: Deposited): void {
   let mint = Mint.load(mints[mints.length - 1])
 
   let pair = Pair.load(event.address.toHex())
-  let mooniswap = MooniswapFactory.load(FACTORY_ADDRESS)
+  let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
 
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
@@ -249,13 +249,13 @@ export function handleMint(event: Deposited): void {
 
   // update txn counts
   pair.txCount = pair.txCount.plus(ONE_BI)
-  mooniswap.txCount = mooniswap.txCount.plus(ONE_BI)
+  emiswap.txCount = emiswap.txCount.plus(ONE_BI)
 
   // save entities
   token0.save()
   token1.save()
   pair.save()
-  mooniswap.save()
+  emiswap.save()
 
   mint.sender = event.params.account
   mint.amount0 = token0Amount as BigDecimal
@@ -268,7 +268,7 @@ export function handleMint(event: Deposited): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
-  updateMooniswapDayData(event)
+  updateEmiswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 }
@@ -279,7 +279,7 @@ export function handleBurn(event: Withdrawn): void {
   let burn = Burn.load(burns[burns.length - 1])
 
   let pair = Pair.load(event.address.toHex())
-  let mooniswap = MooniswapFactory.load(FACTORY_ADDRESS)
+  let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
 
   let reserves = fetchReserves(pair.id)
   //update token info
@@ -304,14 +304,14 @@ export function handleBurn(event: Withdrawn): void {
     .times(bundle.ethPrice)
 
   // update txn counts
-  mooniswap.txCount = mooniswap.txCount.plus(ONE_BI)
+  emiswap.txCount = emiswap.txCount.plus(ONE_BI)
   pair.txCount = pair.txCount.plus(ONE_BI)
 
   // update global counter and save
   token0.save()
   token1.save()
   pair.save()
-  mooniswap.save()
+  emiswap.save()
 
   // update burn
   // burn.sender = event.params.sender
@@ -326,7 +326,7 @@ export function handleBurn(event: Withdrawn): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
-  updateMooniswapDayData(event)
+  updateEmiswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 }
@@ -400,17 +400,17 @@ export function handleSwap(event: Swapped): void {
   pair.save()
 
   // update global values, only used tracked amounts for volume
-  let mooniswap = MooniswapFactory.load(FACTORY_ADDRESS)
-  mooniswap.totalVolumeUSD = mooniswap.totalVolumeUSD.plus(trackedAmountUSD)
-  mooniswap.totalVolumeETH = mooniswap.totalVolumeETH.plus(trackedAmountETH)
-  mooniswap.txCount = mooniswap.txCount.plus(ONE_BI)
+  let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
+  emiswap.totalVolumeUSD = emiswap.totalVolumeUSD.plus(trackedAmountUSD)
+  emiswap.totalVolumeETH = emiswap.totalVolumeETH.plus(trackedAmountETH)
+  emiswap.txCount = emiswap.txCount.plus(ONE_BI)
 
-  let mooniswapFee = getMooniswapFee()
+  let emiswapFee = getEmiswapFee()
   let returnAmountWithoutVirtualBalances = calculateFormula(
     event.params.srcBalance,
     event.params.dstBalance,
     event.params.amount,
-    mooniswapFee
+    emiswapFee
   )
   let winInFee = returnAmountWithoutVirtualBalances.minus(event.params.result)
   let lpExtraFee = winInFee.isZero()
@@ -426,7 +426,7 @@ export function handleSwap(event: Swapped): void {
   pair.save()
   token0.save()
   token1.save()
-  mooniswap.save()
+  emiswap.save()
 
   let transaction = Transaction.load(event.transaction.hash.toHexString())
   if (transaction === null) {
@@ -503,7 +503,7 @@ export function handleSwap(event: Swapped): void {
   // update day entities
   updatePairDayData(event)
   updatePairHourData(event)
-  updateMooniswapDayData(event)
+  updateEmiswapDayData(event)
   updateTokenDayData(token0 as Token, event)
   updateTokenDayData(token1 as Token, event)
 
@@ -516,10 +516,10 @@ export function handleSwap(event: Swapped): void {
     .concat(BigInt.fromI32(dayID).toString())
 
   // swap specific updating
-  let mooniswapDayData = MooniswapDayData.load(dayID.toString())
-  mooniswapDayData.dailyVolumeUSD = mooniswapDayData.dailyVolumeUSD.plus(trackedAmountUSD)
-  mooniswapDayData.dailyVolumeETH = mooniswapDayData.dailyVolumeETH.plus(trackedAmountETH)
-  mooniswapDayData.save()
+  let emiswapDayData = EmiswapDayData.load(dayID.toString())
+  emiswapDayData.dailyVolumeUSD = emiswapDayData.dailyVolumeUSD.plus(trackedAmountUSD)
+  emiswapDayData.dailyVolumeETH = emiswapDayData.dailyVolumeETH.plus(trackedAmountETH)
+  emiswapDayData.save()
 
   // swap specific updating for pair
   let pairDayData = PairDayData.load(dayPairID)

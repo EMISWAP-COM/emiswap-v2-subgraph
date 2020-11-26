@@ -6,7 +6,9 @@
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "deploy": "graph deploy krboktv/try-second-graph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug"
+    "deploy": "graph deploy krboktv/try-second-graph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "create-local": "graph create EMISWAP-COM/emiswap-subgraph --node http://127.0.0.1:8020",
+    "deploy-local": "graph deploy EMISWAP-COM/emiswap-subgraph --ipfs http://localhost:5001 --node http://localhost:8020"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.16.0",

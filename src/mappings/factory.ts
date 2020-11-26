@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { log } from '@graphprotocol/graph-ts'
-import { MooniswapFactory, Pair, Token, Bundle } from '../types/schema'
+import { EmiswapFactory, Pair, Token, Bundle } from '../types/schema'
 import { Deployed } from '../types/Factory/Factory'
 import { Pair as PairTemplate } from '../types/templates'
 import {
@@ -15,9 +15,9 @@ import {
 
 export function handleNewPair(event: Deployed): void {
   // load factory (create if first exchange)
-  let factory = MooniswapFactory.load(FACTORY_ADDRESS)
+  let factory = EmiswapFactory.load(FACTORY_ADDRESS)
   if (factory == null) {
-    factory = new MooniswapFactory(FACTORY_ADDRESS)
+    factory = new EmiswapFactory(FACTORY_ADDRESS)
     factory.pairCount = 0
     factory.pairs = []
     factory.totalVolumeETH = ZERO_BD
@@ -86,14 +86,14 @@ export function handleNewPair(event: Deployed): void {
   }
 
   let newAllPairsArray0 = token0.allPairs
-  newAllPairsArray0.push(event.params.mooniswap.toHexString())
+  newAllPairsArray0.push(event.params.emiswap.toHexString())
   token0.allPairs = newAllPairsArray0
 
   let newAllPairsArray1 = token1.allPairs
-  newAllPairsArray1.push(event.params.mooniswap.toHexString())
+  newAllPairsArray1.push(event.params.emiswap.toHexString())
   token1.allPairs = newAllPairsArray1
 
-  let pair = new Pair(event.params.mooniswap.toHexString()) as Pair
+  let pair = new Pair(event.params.emiswap.toHexString()) as Pair
   pair.token0 = token0.id
   pair.token1 = token1.id
   pair.createdAtTimestamp = event.block.timestamp
@@ -119,7 +119,7 @@ export function handleNewPair(event: Deployed): void {
   factory.pairs = factoryPairs
 
   // create the tracked contract based on the template
-  PairTemplate.create(event.params.mooniswap)
+  PairTemplate.create(event.params.emiswap)
 
   // save updated values
   token0.save()
