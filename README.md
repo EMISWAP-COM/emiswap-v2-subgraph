@@ -1,14 +1,14 @@
-# Mooniswap Subgraph
+# EmiSwap Subgraph
 
-[Mooniswap](https://mooniswap.exchange/) is a decentralized protocol for automated token exchange on Ethereum.
+[EmiSwap](https://emiswap.com/) is a decentralized protocol for automated token exchange on Ethereum.
 
-This subgraph dynamically tracks any pair created by the mooniswap factory. It tracks of the current state of Mooniswap contracts, and contains derived stats for things like historical data and USD prices.
+This subgraph dynamically tracks any pair created by the mooniswap factory. It tracks of the current state of EmiSwap contracts, and contains derived stats for things like historical data and USD prices.
 
 - aggregated data across pairs and tokens,
 - data on individual pairs and tokens,
 - data on transactions
 - data on liquidity providers
-- historical data on Mooniswap, pairs or tokens, aggregated by day
+- historical data on EmiSwap, pairs or tokens, aggregated by day
 
 ## Running Locally
 
@@ -20,9 +20,9 @@ Below are a few ways to show how to query the mooniswap-subgraph for data. The q
 
 ## Key Entity Overviews
 
-#### MooniswapFactory
+#### EmiSwapFactory
 
-Contains data across all of Mooniswap. This entity tracks important things like total liquidity (in ETH and USD, see below), all time volume, transaction count, number of pairs and more.
+Contains data across all of EmiSwap. This entity tracks important things like total liquidity (in ETH and USD, see below), all time volume, transaction count, number of pairs and more.
 
 #### Token
 
@@ -34,7 +34,7 @@ Contains data on a specific pair.
 
 #### Transaction
 
-Every transaction on Mooniswap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
+Every transaction on EmiSwap is stored. Each transaction contains an array of mints, burns, and swaps that occured within it.
 
 #### Mint, Burn, Swap
 
@@ -42,13 +42,13 @@ These contain specifc information about a transaction. Things like which pair tr
 
 ## Example Queries
 
-### Querying Aggregated Mooniswap Data
+### Querying Aggregated EmiSwap Data
 
 This query fetches aggredated data from all mooniswap pairs and tokens, to give a view into how much activity is happening within the whole protocol.
 
 ```graphql
 {
-  mooniswapFactories(first: 1) {
+  emiswapFactories(first: 1) {
     pairCount
     totalVolumeUSD
     totalLiquidityUSD
