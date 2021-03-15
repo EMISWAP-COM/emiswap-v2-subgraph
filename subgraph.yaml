@@ -1,6 +1,6 @@
 specVersion: 0.0.2
-description: Emiswap is a decentralized protocol for automated token exchange on Ethereum.
-repository: https://github.com/EMISWAP-COM/emiswap-v2-subgraph
+description: Mooniswap is a decentralized protocol for automated token exchange on Ethereum.
+repository: https://github.com/CryptoManiacsZone/mooniswap-subgraph
 schema:
   file: ./schema.graphql
 dataSources:

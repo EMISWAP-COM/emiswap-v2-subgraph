@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { updatePairDayData, updatePairHourData, updateTokenDayData, updateEmiswapDayData } from './dayUpdates'
 import { getTrackedVolumeUSD } from './pricing'
 import {
@@ -256,6 +256,10 @@ export function handleMint(event: Deposited): void {
   token1.save()
   pair.save()
   emiswap.save()
+
+  /*begin*** debug code*/
+  log.info('debug code=====>', [token0Amount.toString(), token1Amount.toString(), amountTotalUSD.toString()])
+  /*end***** debug code*/
 
   mint.sender = event.params.account
   mint.amount0 = token0Amount as BigDecimal
