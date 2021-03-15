@@ -215,12 +215,19 @@ export function handleSync(pairAddress: Address): void {
 
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
+  let trackedLiquidityUSD: BigDecimal
+
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
-      bundle.ethPrice
-    )
+    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+        .div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
+  }
+
+  if (token0.symbol === 'USD') {
+    trackedLiquidityUSD = token0.totalLiquidity;
+  } else if (token1.symbol === 'USD') {
+    trackedLiquidityUSD = token1.totalLiquidity;
   }
 
   // use derived amounts within pair
@@ -228,11 +235,15 @@ export function handleSync(pairAddress: Address): void {
   pair.reserveETH = pair.reserve0
     .times(token0.derivedETH as BigDecimal)
     .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
-  pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
+  if (trackedLiquidityUSD) {
+    pair.reserveUSD = trackedLiquidityUSD
+  } else {
+    pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
+  }
 
   // use tracked amounts globally
   emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(trackedLiquidityETH)
-  emiswap.totalLiquidityUSD = emiswap.totalLiquidityETH.times(bundle.ethPrice)
+  emiswap.totalLiquidityUSD = emiswap.totalLiquidityUSD.plus(trackedLiquidityUSD)
 
   // save entities
   pair.save()
