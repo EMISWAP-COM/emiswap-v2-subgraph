@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { updatePairDayData, updatePairHourData, updateTokenDayData, updateEmiswapDayData } from './dayUpdates'
-import { getTrackedVolumeUSD } from './pricing'
+import {getTrackedVolumeUSD, getTrackedVolumeUsdWithEth} from './pricing'
 import {
   ADDRESS_ZERO,
   BI_18, calculateFormula,
@@ -369,7 +369,8 @@ export function handleSwap(event: Swapped): void {
   if (bundle.ethPrice.equals(ZERO_BD)) {
     trackedAmountETH = ZERO_BD
   } else {
-    trackedAmountETH = trackedAmountUSD.div(bundle.ethPrice)
+    trackedAmountETH = getTrackedVolumeUsdWithEth(amount0, token0 as Token, amount1, token1 as Token)
+        .div(bundle.ethPrice)
   }
 
   // update token0 global volume and token liquidity stats

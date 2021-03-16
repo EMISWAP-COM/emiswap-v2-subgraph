@@ -6,7 +6,7 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
 import { Bundle, LiquidityPosition, EmiswapFactory, Pair, Token, User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
-import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedLiquidityUSDWithEth } from './pricing'
+import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedLiquidityUsdWithEth } from './pricing'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
@@ -220,7 +220,7 @@ export function handleSync(pairAddress: Address): void {
   trackedLiquidityUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
 
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSDWithEth(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+    trackedLiquidityETH = getTrackedLiquidityUsdWithEth(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
         .div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD

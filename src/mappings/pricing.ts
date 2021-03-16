@@ -125,7 +125,7 @@ let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
  * If both are, return average of two amounts
  * If neither is, return 0
  */
-export function getTrackedVolumeUSD(
+export function getTrackedVolumeUsdWithEth(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
@@ -186,7 +186,7 @@ export function getTrackedVolumeUSD(
  * If both are, return sum of two amounts
  * If neither is, return 0
  */
-export function getTrackedLiquidityUSDWithEth(
+export function getTrackedLiquidityUsdWithEth(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
@@ -215,11 +215,59 @@ export function getTrackedLiquidityUSDWithEth(
   return ZERO_BD
 }
 
+export function getTrackedVolumeUSD(
+    tokenAmount0: BigDecimal,
+    token0: Token,
+    tokenAmount1: BigDecimal,
+    token1: Token
+): BigDecimal {
+
+  let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
+  let pair = Pair.load(pairAddress.toHexString())
+
+  // if only 1 LP, require high minimum reserve amount amount or return 0
+  if (pair.liquidityPositions.length < 5) {
+    if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+      if (tokenAmount0.lt(MINIMUM_USD_THRESHOLD_NEW_PAIRS)) {
+        return ZERO_BD
+      }
+    }
+    if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
+      if (tokenAmount0.lt(MINIMUM_USD_THRESHOLD_NEW_PAIRS)) {
+        return ZERO_BD
+      }
+    }
+    if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+      if (tokenAmount1.lt(MINIMUM_USD_THRESHOLD_NEW_PAIRS)) {
+        return ZERO_BD
+      }
+    }
+  }
+
+  if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+    // both are whitelist tokens, take average of both amounts
+    return tokenAmount0;
+  }
+
+  // take full value of the whitelisted token amount
+  if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
+    return tokenAmount0
+  }
+
+  // take full value of the whitelisted token amount
+  if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+    return tokenAmount1
+  }
+
+  // neither token is on white list, tracked volume is 0
+  return ZERO_BD
+}
+
 export function getTrackedLiquidityUSD(
-  tokenAmount0: BigDecimal,
-  token0: Token,
-  tokenAmount1: BigDecimal,
-  token1: Token
+    tokenAmount0: BigDecimal,
+    token0: Token,
+    tokenAmount1: BigDecimal,
+    token1: Token
 ): BigDecimal {
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
