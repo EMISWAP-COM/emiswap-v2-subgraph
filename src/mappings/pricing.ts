@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
-import { Pair, Token, Bundle } from '../types/schema'
-import { BigDecimal, Address } from '@graphprotocol/graph-ts/index'
-import { ZERO_BD, factoryContract, ADDRESS_ZERO } from './helpers'
+import { Bundle, Pair, Token } from '../types/schema'
+import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
+import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
 const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
@@ -111,6 +111,12 @@ let WHITELIST: string[] = [
   '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
 ]
 
+let USD_LIST: string[] = [
+  '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+  '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+];
+
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
 /**
@@ -180,7 +186,7 @@ export function getTrackedVolumeUSD(
  * If both are, return sum of two amounts
  * If neither is, return 0
  */
-export function getTrackedLiquidityUSD(
+export function getTrackedLiquidityUSDWithEth(
   tokenAmount0: BigDecimal,
   token0: Token,
   tokenAmount1: BigDecimal,
@@ -206,5 +212,27 @@ export function getTrackedLiquidityUSD(
   }
 
   // neither token is on white list, tracked volume is 0
+  return ZERO_BD
+}
+
+export function getTrackedLiquidityUSD(
+  tokenAmount0: BigDecimal,
+  token0: Token,
+  tokenAmount1: BigDecimal,
+  token1: Token
+): BigDecimal {
+
+  if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+    return tokenAmount0
+  }
+
+  if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
+    return tokenAmount0
+  }
+
+  if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
+    return tokenAmount1
+  }
+
   return ZERO_BD
 }

@@ -6,7 +6,7 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
 import { Bundle, LiquidityPosition, EmiswapFactory, Pair, Token, User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
-import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD } from './pricing'
+import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedLiquidityUSDWithEth } from './pricing'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
@@ -217,17 +217,13 @@ export function handleSync(pairAddress: Address): void {
   let trackedLiquidityETH: BigDecimal
   let trackedLiquidityUSD: BigDecimal
 
+  trackedLiquidityUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+    trackedLiquidityETH = getTrackedLiquidityUSDWithEth(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
         .div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
-  }
-
-  if (token0.symbol === 'USD') {
-    trackedLiquidityUSD = token0.totalLiquidity;
-  } else if (token1.symbol === 'USD') {
-    trackedLiquidityUSD = token1.totalLiquidity;
   }
 
   // use derived amounts within pair
@@ -235,6 +231,7 @@ export function handleSync(pairAddress: Address): void {
   pair.reserveETH = pair.reserve0
     .times(token0.derivedETH as BigDecimal)
     .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
+
   if (trackedLiquidityUSD) {
     pair.reserveUSD = trackedLiquidityUSD
   } else {
