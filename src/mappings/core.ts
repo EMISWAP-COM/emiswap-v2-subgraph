@@ -1,16 +1,18 @@
 /* eslint-disable prefer-const */
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
-import { updatePairDayData, updatePairHourData, updateTokenDayData, updateEmiswapDayData } from './dayUpdates'
-import {getTrackedVolumeUSD, getTrackedVolumeUsdWithEth} from './pricing'
+import { updateEmiswapDayData, updatePairDayData, updatePairHourData, updateTokenDayData } from './dayUpdates'
+import { getTrackedLiquidityUSD, getTrackedVolumeUSD, getTrackedVolumeUsdWithEth } from './pricing'
 import {
   ADDRESS_ZERO,
-  BI_18, calculateFormula,
+  BI_18,
+  calculateFormula,
   convertTokenToDecimal,
   createLiquidityPosition,
   createUser,
   FACTORY_ADDRESS,
-  fetchReserves, getEmiswapFee,
-  handleSync, ONE_BD,
+  fetchReserves,
+  getEmiswapFee,
+  handleSync,
   ONE_BI,
   ZERO_BD
 } from './helpers'
@@ -18,9 +20,9 @@ import { Transfer } from '../types/Factory/ERC20'
 import {
   Bundle,
   Burn,
-  Mint,
   EmiswapDayData,
   EmiswapFactory,
+  Mint,
   Pair,
   PairDayData,
   Swap,
@@ -240,12 +242,18 @@ export function handleMint(event: Deposited): void {
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
+  let amountTotalUSD: BigDecimal
+
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
-  let amountTotalUSD = token1.derivedETH
-    .times(token1Amount)
-    .plus(token0.derivedETH.times(token0Amount))
-    .times(bundle.ethPrice)
+  if (bundle.ethPrice.equals(ZERO_BD)) {
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0, token1Amount, token1)
+  } else {
+    amountTotalUSD = token1.derivedETH
+      .times(token1Amount)
+      .plus(token0.derivedETH.times(token0Amount))
+      .times(bundle.ethPrice)
+  }
 
   // update txn counts
   pair.txCount = pair.txCount.plus(ONE_BI)
@@ -300,12 +308,18 @@ export function handleBurn(event: Withdrawn): void {
   token0.txCount = token0.txCount.plus(ONE_BI)
   token1.txCount = token1.txCount.plus(ONE_BI)
 
+  let amountTotalUSD: BigDecimal
+
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
-  let amountTotalUSD = token1.derivedETH
-    .times(token1Amount)
-    .plus(token0.derivedETH.times(token0Amount))
-    .times(bundle.ethPrice)
+  if (bundle.ethPrice.equals(ZERO_BD)) {
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0, token1Amount, token1)
+  } else {
+    amountTotalUSD = token1.derivedETH
+      .times(token1Amount)
+      .plus(token0.derivedETH.times(token0Amount))
+      .times(bundle.ethPrice)
+  }
 
   // update txn counts
   emiswap.txCount = emiswap.txCount.plus(ONE_BI)
@@ -354,13 +368,19 @@ export function handleSwap(event: Swapped): void {
 
   // ETH/USD prices
   let bundle = Bundle.load('1')
+  let derivedAmountUSD: BigDecimal
 
   // get total amounts of derived USD and ETH for tracking
   let derivedAmountETH = token1.derivedETH
     .times(amount1)
     .plus(token0.derivedETH.times(amount0))
     .div(BigDecimal.fromString('2'))
-  let derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
+
+  if (bundle.ethPrice.equals(ZERO_BD)) {
+    derivedAmountUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+  } else {
+    derivedAmountUSD = derivedAmountETH.times(bundle.ethPrice)
+  }
 
   // only accounts for volume through white listed tokens
   let trackedAmountUSD = getTrackedVolumeUSD(amount0, token0 as Token, amount1, token1 as Token)
