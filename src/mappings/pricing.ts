@@ -222,11 +222,11 @@ export function getTrackedVolumeUSD(
     token1: Token
 ): BigDecimal {
 
-  let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
-  let pair = Pair.load(pairAddress.toHexString())
+  /*let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
+  let pair = Pair.load(pairAddress.toHexString())*/
 
   // if only 1 LP, require high minimum reserve amount amount or return 0
-  if (pair.liquidityPositions.length < 5) {
+  /*if (pair.liquidityPositions.length < 5) {
     if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
       if (tokenAmount0.lt(MINIMUM_USD_THRESHOLD_NEW_PAIRS)) {
         return ZERO_BD
@@ -242,7 +242,7 @@ export function getTrackedVolumeUSD(
         return ZERO_BD
       }
     }
-  }
+  }*/
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
     // both are whitelist tokens, take average of both amounts

@@ -247,7 +247,7 @@ export function handleMint(event: Deposited): void {
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   if (bundle.ethPrice.equals(ZERO_BD)) {
-    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0, token1Amount, token1)
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0 as Token, token1Amount, token1 as Token)
   } else {
     amountTotalUSD = token1.derivedETH
       .times(token1Amount)
@@ -313,7 +313,7 @@ export function handleBurn(event: Withdrawn): void {
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   if (bundle.ethPrice.equals(ZERO_BD)) {
-    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0, token1Amount, token1)
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, token0 as Token, token1Amount, token1 as Token)
   } else {
     amountTotalUSD = token1.derivedETH
       .times(token1Amount)
@@ -384,6 +384,9 @@ export function handleSwap(event: Swapped): void {
 
   // only accounts for volume through white listed tokens
   let trackedAmountUSD = getTrackedVolumeUSD(amount0, token0 as Token, amount1, token1 as Token)
+  if (trackedAmountUSD.equals(ZERO_BD)) {
+    trackedAmountUSD = getTrackedVolumeUsdWithEth(amount0, token0 as Token, amount1, token1 as Token)
+  }
 
   let trackedAmountETH: BigDecimal
   if (bundle.ethPrice.equals(ZERO_BD)) {
