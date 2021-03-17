@@ -429,7 +429,7 @@ export function handleSwap(event: Swapped): void {
 
   // update global values, only used tracked amounts for volume
   let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
-  emiswap.totalVolumeUSD = emiswap.totalVolumeUSD.plus(trackedAmountUSD)
+  emiswap.totalVolumeUSD = BigDecimal.fromString('3') //emiswap.totalVolumeUSD.plus(trackedAmountUSD)
   emiswap.totalVolumeETH = emiswap.totalVolumeETH.plus(trackedAmountETH)
   emiswap.txCount = emiswap.txCount.plus(ONE_BI)
 
