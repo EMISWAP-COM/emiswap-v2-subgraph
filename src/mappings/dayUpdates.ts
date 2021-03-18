@@ -19,7 +19,7 @@ export function updateEmiswapDayData(event: EthereumEvent): void {
     emiswapDayData.date = dayStartTimestamp
     emiswapDayData.dailyVolumeUSD = ZERO_BD
     emiswapDayData.dailyVolumeETH = ZERO_BD
-    emiswapDayData.totalVolumeUSD = BigDecimal.fromString('2')
+    emiswapDayData.totalVolumeUSD = ZERO_BD
     emiswapDayData.totalVolumeETH = ZERO_BD
     emiswapDayData.totalLiquidityUSD = ZERO_BD
     emiswapDayData.totalLiquidityETH = ZERO_BD
@@ -29,6 +29,8 @@ export function updateEmiswapDayData(event: EthereumEvent): void {
     emiswapDayData.save()
   }
   emiswapDayData = EmiswapDayData.load(dayID.toString())
+  emiswapDayData.totalVolumeUSD = emiswap.totalVolumeUSD
+  emiswapDayData.totalVolumeETH = emiswap.totalVolumeETH
   emiswapDayData.totalLiquidityUSD = emiswap.totalLiquidityUSD
   emiswapDayData.totalLiquidityETH = emiswap.totalLiquidityETH
   emiswapDayData.txCount = emiswap.txCount
