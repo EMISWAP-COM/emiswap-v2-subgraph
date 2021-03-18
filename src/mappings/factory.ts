@@ -23,7 +23,7 @@ export function handleNewPair(event: Deployed): void {
     factory.pairs = []
     factory.totalVolumeETH = ZERO_BD
     factory.totalLiquidityETH = ZERO_BD
-    factory.totalVolumeUSD = BigDecimal.fromString('1')
+    factory.totalVolumeUSD = ZERO_BD
     factory.totalLiquidityUSD = ZERO_BD
     factory.txCount = ZERO_BI
     factory.mostLiquidTokens = []
