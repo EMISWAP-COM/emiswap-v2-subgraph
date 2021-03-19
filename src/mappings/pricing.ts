@@ -119,6 +119,16 @@ let USD_LIST: string[] = [
 
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
+export function geUsdPerToken(pair: Pair, token: Token): BigDecimal {
+  if (USD_LIST.includes(token.id) && pair.token0 == token.id) {
+    return pair.token0Price
+  } else if (USD_LIST.includes(token.id) && pair.token1 == token.id) {
+    return pair.token1Price
+  }
+
+  return ZERO_BD
+}
+
 /**
  * Accepts tokens and amounts, return tracked amount based on token whitelist
  * If one token on whitelist, return amount in that token converted to USD.

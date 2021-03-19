@@ -6,7 +6,13 @@ import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
 import { Bundle, LiquidityPosition, EmiswapFactory, Pair, Token, User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
-import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD, getTrackedLiquidityUsdWithEth } from './pricing'
+import {
+  findEthPerToken,
+  getEthPriceInUSD,
+  getTrackedLiquidityUSD,
+  getTrackedLiquidityUsdWithEth,
+  geUsdPerToken
+} from './pricing'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
@@ -210,6 +216,8 @@ export function handleSync(pairAddress: Address): void {
 
   token0.derivedETH = findEthPerToken(token0 as Token, false)
   token1.derivedETH = findEthPerToken(token1 as Token, false)
+  token0.derivedUSD = geUsdPerToken(pair as Pair, token0 as Token)
+  token1.derivedUSD = geUsdPerToken(pair as Pair, token1 as Token)
   token0.save()
   token1.save()
 

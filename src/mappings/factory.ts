@@ -13,6 +13,7 @@ import {
   fetchTokenTotalSupply
 } from './helpers'
 import {BigDecimal} from "@graphprotocol/graph-ts/index";
+import { findEthPerToken, geUsdPerToken } from './pricing'
 
 export function handleNewPair(event: Deployed): void {
   // load factory (create if first exchange)
@@ -54,6 +55,7 @@ export function handleNewPair(event: Deployed): void {
     }
 
     token0.decimals = decimals
+    token0.derivedUSD = ZERO_BD
     token0.derivedETH = ZERO_BD
     token0.tradeVolume = ZERO_BD
     token0.tradeVolumeUSD = ZERO_BD
@@ -77,6 +79,7 @@ export function handleNewPair(event: Deployed): void {
       return
     }
     token1.decimals = decimals
+    token0.derivedUSD = ZERO_BD
     token1.derivedETH = ZERO_BD
     token1.tradeVolume = ZERO_BD
     token1.tradeVolumeUSD = ZERO_BD
