@@ -256,17 +256,17 @@ export function getTrackedVolumeUSD(
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
     // both are whitelist tokens, take average of both amounts
-    return tokenAmount0;
+    return tokenAmount0.plus(tokenAmount1)
   }
 
   // take full value of the whitelisted token amount
   if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.times(BigDecimal.fromString('2'))
   }
 
   // take full value of the whitelisted token amount
   if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount1
+    return tokenAmount1.times(BigDecimal.fromString('2'))
   }
 
   // neither token is on white list, tracked volume is 0
@@ -281,15 +281,15 @@ export function getTrackedLiquidityUSD(
 ): BigDecimal {
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.plus(tokenAmount1)
   }
 
   if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.times(BigDecimal.fromString('2'))
   }
 
   if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount1
+    return tokenAmount1.times(BigDecimal.fromString('2'))
   }
 
   return ZERO_BD
