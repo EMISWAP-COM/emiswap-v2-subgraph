@@ -7,7 +7,7 @@
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
     "auth": "graph auth https://api.thegraph.com/deploy/ ce9e463042c6406189067f1313b5feb6",
-    "deploy": "graph deploy lombardi22/emiswap3 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy": "graph deploy lombardi22/emiswap4 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-local": "graph create EMISWAP-COM/emiswap-subgraph --node http://localhost:8020",
     "deploy-local": "graph deploy EMISWAP-COM/emiswap-subgraph --ipfs http://localhost:5001 --node http://localhost:8020"
   },
