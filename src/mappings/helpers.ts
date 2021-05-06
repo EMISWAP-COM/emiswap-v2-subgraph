@@ -234,21 +234,29 @@ export function handleSync(pairAddress: Address): void {
     trackedLiquidityETH = ZERO_BD
   }
 
+  const deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
+      ? trackedLiquidityUSD.minus(pair.reserveUSD)
+      : ZERO_BD;
+
+  const deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
+      ? trackedLiquidityETH.minus(pair.trackedReserveETH)
+      : ZERO_BD;
+
   // use derived amounts within pair
   pair.trackedReserveETH = trackedLiquidityETH
   pair.reserveETH = pair.reserve0
     .times(token0.derivedETH as BigDecimal)
     .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
 
-  if (trackedLiquidityUSD) {
+  if (trackedLiquidityUSD.notEqual(ZERO_BD)) {
     pair.reserveUSD = trackedLiquidityUSD
   } else {
     pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
   }
 
   // use tracked amounts globally
-  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(trackedLiquidityETH)
-  emiswap.totalLiquidityUSD = emiswap.totalLiquidityUSD.plus(trackedLiquidityUSD)
+  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(deltaLiquidityETH)
+  emiswap.totalLiquidityUSD = emiswap.totalLiquidityUSD.plus(deltaLiquidityUSD)
 
   // save entities
   pair.save()
