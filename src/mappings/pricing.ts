@@ -3,10 +3,11 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
+const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+const DAI_ETH_PAIR = '0xe2b150625e57ED27fbae3D27857953b3e1bd6eAc'
+const USDT_ETH_PAIR = '0xc02AEE6E383b53b4b04dFBB9C5C76eBc2751522a'
+
 const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
-const DAI_ETH_PAIR = '0x75116bd1ab4b0065b44e1a4ea9b4180a171406ed' // created block 10634917
-const USDT_ETH_PAIR = '0xbeabef3fc02667d8bd3f702ae0bb2c4edb3640cc' // created block 10638158
 
 // dummy for testing
 export function getEthPriceInUSD(): BigDecimal {
