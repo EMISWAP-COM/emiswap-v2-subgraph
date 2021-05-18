@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { Bundle, Pair, Token } from '../types/schema'
-import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
+import {Address, BigDecimal, log} from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
 const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
@@ -33,6 +33,9 @@ export function getEthPriceInUSD(): BigDecimal {
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
+
+    log.info('getEthPriceInUSD 1 if', [totalLiquidityETH.toString()])
+
     return daiTokenPrice
         .times(daiWeight)
         .plus(usdcTokenPrice.times(usdcWeight))
@@ -42,11 +45,17 @@ export function getEthPriceInUSD(): BigDecimal {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
+
+    log.info('getEthPriceInUSD 2 if', [totalLiquidityETH.toString()])
+
     return daiTokenPrice.times(daiWeight).plus(usdcTokenPrice.times(usdcWeight))
     // USDC is the only pair so far
   } else if (usdcPair !== null) {
+    log.info('getEthPriceInUSD 3 if', [usdcTokenPrice.toString()])
+
     return usdcTokenPrice
   } else {
+    log.info('getEthPriceInUSD 4 if', [])
     return ZERO_BD
   }
 }
