@@ -3,10 +3,11 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
+const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+const DAI_ETH_PAIR = '0xe2b150625e57ED27fbae3D27857953b3e1bd6eAc'
+const USDT_ETH_PAIR = '0xc02AEE6E383b53b4b04dFBB9C5C76eBc2751522a'
+
 const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
-const DAI_ETH_PAIR = '0x75116bd1ab4b0065b44e1a4ea9b4180a171406ed' // created block 10634917
-const USDT_ETH_PAIR = '0xbeabef3fc02667d8bd3f702ae0bb2c4edb3640cc' // created block 10638158
 
 // dummy for testing
 export function getEthPriceInUSD(): BigDecimal {
@@ -16,25 +17,35 @@ export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
+  const daiTokenPrice = BigDecimal.fromString(daiPair.token1) > BigDecimal.fromString(daiPair.token0)
+    ? daiPair.token1Price
+    : daiPair.token0Price;
+  const usdcTokenPrice = BigDecimal.fromString(usdcPair.token1) > BigDecimal.fromString(usdcPair.token0)
+    ? usdcPair.token1Price
+    : usdcPair.token0Price;
+  const usdtTokenPrice = BigDecimal.fromString(usdtPair.token1) > BigDecimal.fromString(usdtPair.token0)
+    ? usdtPair.token1Price
+    : usdtPair.token0Price;
+
   // all 3 have been created
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    return daiPair.token1Price
+    return daiTokenPrice
         .times(daiWeight)
-        .plus(usdcPair.token1Price.times(usdcWeight))
-        .plus(usdtPair.token1Price.times(usdtWeight))
+        .plus(usdcTokenPrice.times(usdcWeight))
+        .plus(usdtTokenPrice.times(usdtWeight))
     // dai and USDC have been created
   } else if (daiPair !== null && usdcPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    return daiPair.token1Price.times(daiWeight).plus(usdcPair.token1Price.times(usdcWeight))
+    return daiTokenPrice.times(daiWeight).plus(usdcTokenPrice.times(usdcWeight))
     // USDC is the only pair so far
   } else if (usdcPair !== null) {
-    return usdcPair.token1Price
+    return usdcTokenPrice
   } else {
     return ZERO_BD
   }
@@ -118,6 +129,16 @@ let USD_LIST: string[] = [
 ];
 
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
+
+export function geUsdPerToken(pair: Pair, token: Token): BigDecimal {
+  if (USD_LIST.includes(token.id) && pair.token0 == token.id) {
+    return pair.token0Price
+  } else if (USD_LIST.includes(token.id) && pair.token1 == token.id) {
+    return pair.token1Price
+  }
+
+  return ZERO_BD
+}
 
 /**
  * Accepts tokens and amounts, return tracked amount based on token whitelist
@@ -246,17 +267,17 @@ export function getTrackedVolumeUSD(
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
     // both are whitelist tokens, take average of both amounts
-    return tokenAmount0;
+    return tokenAmount0.plus(tokenAmount1)
   }
 
   // take full value of the whitelisted token amount
   if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.times(BigDecimal.fromString('2'))
   }
 
   // take full value of the whitelisted token amount
   if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount1
+    return tokenAmount1.times(BigDecimal.fromString('2'))
   }
 
   // neither token is on white list, tracked volume is 0
@@ -271,15 +292,15 @@ export function getTrackedLiquidityUSD(
 ): BigDecimal {
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.plus(tokenAmount1)
   }
 
   if (USD_LIST.includes(token0.id) && !USD_LIST.includes(token1.id)) {
-    return tokenAmount0
+    return tokenAmount0.times(BigDecimal.fromString('2'))
   }
 
   if (!USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {
-    return tokenAmount1
+    return tokenAmount1.times(BigDecimal.fromString('2'))
   }
 
   return ZERO_BD
