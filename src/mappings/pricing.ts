@@ -2,7 +2,6 @@
 import { Bundle, Pair, Token } from '../types/schema'
 import {Address, BigDecimal, log} from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
-import { log } from '@graphprotocol/graph-ts'
 
 const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
 const DAI_ETH_PAIR = '0xe2b150625e57ED27fbae3D27857953b3e1bd6eAc'
@@ -18,20 +17,18 @@ export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
-  let daiTokenPrice = BigDecimal.fromString(daiPair.token1) > BigDecimal.fromString(daiPair.token0)
+  const daiTokenPrice = BigDecimal.fromString(daiPair.token1) > BigDecimal.fromString(daiPair.token0)
     ? daiPair.token1Price
     : daiPair.token0Price;
-  let usdcTokenPrice = BigDecimal.fromString(usdcPair.token1) > BigDecimal.fromString(usdcPair.token0)
+  const usdcTokenPrice = BigDecimal.fromString(usdcPair.token1) > BigDecimal.fromString(usdcPair.token0)
     ? usdcPair.token1Price
     : usdcPair.token0Price;
-  let usdtTokenPrice = BigDecimal.fromString(usdtPair.token1) > BigDecimal.fromString(usdtPair.token0)
+  const usdtTokenPrice = BigDecimal.fromString(usdtPair.token1) > BigDecimal.fromString(usdtPair.token0)
     ? usdtPair.token1Price
     : usdtPair.token0Price;
 
   // all 3 have been created
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
-    //log.info('My value is: {}', [daiPair.token0])
-    
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
