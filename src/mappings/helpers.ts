@@ -234,11 +234,11 @@ export function handleSync(pairAddress: Address): void {
     trackedLiquidityETH = ZERO_BD
   }
 
-  const deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
+  let deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
       ? trackedLiquidityUSD.minus(pair.reserveUSD)
       : ZERO_BD;
 
-  const deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
+  let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
       ? trackedLiquidityETH.minus(pair.trackedReserveETH)
       : ZERO_BD;
 
