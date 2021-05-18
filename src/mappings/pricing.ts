@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { Bundle, Pair, Token } from '../types/schema'
-import {Address, BigDecimal, log} from '@graphprotocol/graph-ts/index'
+import {Address, BigDecimal, log, Value} from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
 const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
@@ -17,13 +17,13 @@ export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
-  const daiTokenPrice = BigDecimal.fromString(daiPair.token1) > BigDecimal.fromString(daiPair.token0)
+  const daiTokenPrice = Value.fromString(daiPair.token1).toBigDecimal() > Value.fromString(daiPair.token0).toBigDecimal()
     ? daiPair.token1Price
     : daiPair.token0Price;
-  const usdcTokenPrice = BigDecimal.fromString(usdcPair.token1) > BigDecimal.fromString(usdcPair.token0)
+  const usdcTokenPrice = Value.fromString(usdcPair.token1).toBigDecimal() > Value.fromString(usdcPair.token0).toBigDecimal()
     ? usdcPair.token1Price
     : usdcPair.token0Price;
-  const usdtTokenPrice = BigDecimal.fromString(usdtPair.token1) > BigDecimal.fromString(usdtPair.token0)
+  const usdtTokenPrice = Value.fromString(usdtPair.token1).toBigDecimal() > Value.fromString(usdtPair.token0).toBigDecimal()
     ? usdtPair.token1Price
     : usdtPair.token0Price;
 

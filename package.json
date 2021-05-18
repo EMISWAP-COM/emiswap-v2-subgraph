@@ -7,6 +7,7 @@
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
     "auth": "graph auth https://api.thegraph.com/deploy/ ce9e463042c6406189067f1313b5feb6",
+    "deploy": "graph deploy lombardi22/emiswap6 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy2": "graph deploy kiselevmaxim/emiswap1 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "allin2": "graph codegen --output-dir src/types/ && graph build && graph deploy kiselevmaxim/emiswap4 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-local": "graph create EMISWAP-COM/emiswap-subgraph --node http://localhost:8020",
