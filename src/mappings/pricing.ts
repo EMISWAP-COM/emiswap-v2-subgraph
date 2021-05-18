@@ -17,25 +17,35 @@ export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
+  const daiTokenPrice = BigDecimal.fromString(daiPair.token1) > BigDecimal.fromString(daiPair.token0)
+    ? daiPair.token1Price
+    : daiPair.token0Price;
+  const usdcTokenPrice = BigDecimal.fromString(usdcPair.token1) > BigDecimal.fromString(usdcPair.token0)
+    ? usdcPair.token1Price
+    : usdcPair.token0Price;
+  const usdtTokenPrice = BigDecimal.fromString(usdtPair.token1) > BigDecimal.fromString(usdtPair.token0)
+    ? usdtPair.token1Price
+    : usdtPair.token0Price;
+
   // all 3 have been created
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    return daiPair.token1Price
+    return daiTokenPrice
         .times(daiWeight)
-        .plus(usdcPair.token1Price.times(usdcWeight))
-        .plus(usdtPair.token1Price.times(usdtWeight))
+        .plus(usdcTokenPrice.times(usdcWeight))
+        .plus(usdtTokenPrice.times(usdtWeight))
     // dai and USDC have been created
   } else if (daiPair !== null && usdcPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    return daiPair.token1Price.times(daiWeight).plus(usdcPair.token1Price.times(usdcWeight))
+    return daiTokenPrice.times(daiWeight).plus(usdcTokenPrice.times(usdcWeight))
     // USDC is the only pair so far
   } else if (usdcPair !== null) {
-    return usdcPair.token1Price
+    return usdcTokenPrice
   } else {
     return ZERO_BD
   }
