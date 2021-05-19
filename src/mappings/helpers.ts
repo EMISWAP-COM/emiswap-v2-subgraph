@@ -234,11 +234,11 @@ export function handleSync(pairAddress: Address): void {
     trackedLiquidityETH = ZERO_BD
   }
 
-  const deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
+  let deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
       ? trackedLiquidityUSD.minus(pair.reserveUSD)
       : ZERO_BD;
 
-  const deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
+  let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
       ? trackedLiquidityETH.minus(pair.trackedReserveETH)
       : ZERO_BD;
 
@@ -271,4 +271,23 @@ export function getEmiswapFee(): BigInt {
 export function calculateFormula(balA: BigInt, balB: BigInt, amount: BigInt, fee: BigInt): BigInt {
   let taxedAmount = amount.minus(amount.times(fee).div(EXP_18))
   return taxedAmount.times(balB).div(balA.plus(taxedAmount))
+}
+
+export class TokensMap {
+  tokenETH: Token;
+  tokenStable: Token;
+}
+
+export function getTokensMap(pair: Pair | null): TokensMap {
+  if (pair.token0 === ETH_ADDRESS) {
+    return {
+      tokenETH: Token.load(pair.token0) as Token,
+      tokenStable: Token.load(pair.token1) as Token,
+    }
+  } else {
+    return {
+      tokenETH: Token.load(pair.token1) as Token,
+      tokenStable: Token.load(pair.token0) as Token,
+    }
+  }
 }
