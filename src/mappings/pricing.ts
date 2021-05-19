@@ -10,65 +10,66 @@ export const USDT_ETH_PAIR = '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
 export const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
 
 export function getDaiTokenPrice(daiPair: Pair): BigDecimal {
-  return Value.fromString(daiPair.token1).toBigDecimal().gt(Value.fromString(daiPair.token0).toBigDecimal())
+  return daiPair.token1Price.lt(daiPair.token0Price)
     ? daiPair.token1Price
     : daiPair.token0Price;
 }
 
 export function getUsdcTokenPrice(usdcPair: Pair): BigDecimal {
-  return Value.fromString(usdcPair.token1).toBigDecimal().gt(Value.fromString(usdcPair.token0).toBigDecimal())
+  return usdcPair.token1Price.lt(usdcPair.token0Price)
     ? usdcPair.token1Price
     : usdcPair.token0Price;
 }
 
 export function getUsdtTokenPrice(usdtPair: Pair): BigDecimal {
-  return Value.fromString(usdtPair.token1).toBigDecimal().gt(Value.fromString(usdtPair.token0).toBigDecimal())
+  return usdtPair.token1Price.lt(usdtPair.token0Price)
     ? usdtPair.token1Price
     : usdtPair.token0Price;
 }
 
+// fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
-  // fetch eth prices for each stablecoin
 
   let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
-  log.debug('getEthPriceInUSD pairs: {}, {}, {}', [
+  log.debug('getEthPriceInUSD pairs: daiPair {}, usdcPair {}, usdtPair {}', [
     daiPair !== null ? 'true' : 'false',
     usdcPair !== null ? 'true' : 'false',
     usdtPair !== null ? 'true' : 'false'
   ]);
 
-  // all 3 have been created
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-
     log.info('getEthPriceInUSD 1 if: {}', [totalLiquidityETH.toString()])
-
     return getDaiTokenPrice(daiPair!)
         .times(daiWeight)
         .plus(getUsdcTokenPrice(usdcPair!).times(usdcWeight))
         .plus(getUsdtTokenPrice(usdtPair!).times(usdtWeight))
-    // dai and USDC have been created
   } else if (daiPair !== null && usdcPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-
     log.info('getEthPriceInUSD 2 if: {}', [totalLiquidityETH.toString()])
-
     return getDaiTokenPrice(daiPair!).times(daiWeight).plus(getUsdcTokenPrice(usdcPair!).times(usdcWeight))
-    // USDC is the only pair so far
+  } else if (daiPair !== null && usdtPair !== null) {
+    let totalLiquidityETH = daiPair.reserve0.plus(usdtPair.reserve0)
+    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
+    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
+    log.info('getEthPriceInUSD 3 if: {}', [totalLiquidityETH.toString()])
+    return getDaiTokenPrice(daiPair!).times(daiWeight).plus(getUsdtTokenPrice(usdtPair!).times(usdtWeight))
   } else if (usdcPair !== null) {
-    log.info('getEthPriceInUSD 3 if: {}', [getUsdcTokenPrice(usdcPair!).toString()])
-
+    log.info('getEthPriceInUSD 4 if: {}', [getUsdcTokenPrice(usdcPair!).toString()])
     return getUsdcTokenPrice(usdcPair!)
+  } else if (usdtPair !== null) {
+    log.info('getEthPriceInUSD 5 if: {}', [getUsdtTokenPrice(usdtPair!).toString()])
+    return getUsdtTokenPrice(usdtPair!)
   } else {
-    log.info('getEthPriceInUSD 4 if: {}', [])
+    log.info('getEthPriceInUSD 6 if', [])
     return ZERO_BD
   }
 }
