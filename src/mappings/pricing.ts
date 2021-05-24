@@ -9,22 +9,10 @@ export const USDT_ETH_PAIR = '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
 
 export const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
 
-export function getDaiTokenPrice(daiPair: Pair): BigDecimal {
-  return daiPair.token1Price.lt(daiPair.token0Price)
-    ? daiPair.token1Price
-    : daiPair.token0Price;
-}
-
-export function getUsdcTokenPrice(usdcPair: Pair): BigDecimal {
-  return usdcPair.token1Price.lt(usdcPair.token0Price)
-    ? usdcPair.token1Price
-    : usdcPair.token0Price;
-}
-
-export function getUsdtTokenPrice(usdtPair: Pair): BigDecimal {
-  return usdtPair.token1Price.lt(usdtPair.token0Price)
-    ? usdtPair.token1Price
-    : usdtPair.token0Price;
+export function getEthTokenPrice(pair: Pair): BigDecimal {
+  return pair.token1Price.gt(pair.token0Price)
+    ? pair.token1Price
+    : pair.token0Price;
 }
 
 // fetch eth prices for each stablecoin
@@ -34,11 +22,11 @@ export function getEthPriceInUSD(): BigDecimal {
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
 
-  log.debug('getEthPriceInUSD pairs: daiPair {}, usdcPair {}, usdtPair {}', [
+  /*log.debug('getEthPriceInUSD pairs: daiPair {}, usdcPair {}, usdtPair {}', [
     daiPair !== null ? 'true' : 'false',
     usdcPair !== null ? 'true' : 'false',
     usdtPair !== null ? 'true' : 'false'
-  ]);
+  ]);*/
 
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
@@ -46,28 +34,28 @@ export function getEthPriceInUSD(): BigDecimal {
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
     log.info('getEthPriceInUSD 1 if: {}', [totalLiquidityETH.toString()])
-    return getDaiTokenPrice(daiPair!)
+    return getEthTokenPrice(daiPair!)
         .times(daiWeight)
-        .plus(getUsdcTokenPrice(usdcPair!).times(usdcWeight))
-        .plus(getUsdtTokenPrice(usdtPair!).times(usdtWeight))
+        .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
+        .plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
   } else if (daiPair !== null && usdcPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     log.info('getEthPriceInUSD 2 if: {}', [totalLiquidityETH.toString()])
-    return getDaiTokenPrice(daiPair!).times(daiWeight).plus(getUsdcTokenPrice(usdcPair!).times(usdcWeight))
+    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
   } else if (daiPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
     log.info('getEthPriceInUSD 3 if: {}', [totalLiquidityETH.toString()])
-    return getDaiTokenPrice(daiPair!).times(daiWeight).plus(getUsdtTokenPrice(usdtPair!).times(usdtWeight))
+    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
   } else if (usdcPair !== null) {
-    log.info('getEthPriceInUSD 4 if: {}', [getUsdcTokenPrice(usdcPair!).toString()])
-    return getUsdcTokenPrice(usdcPair!)
+    log.info('getEthPriceInUSD 4 if: {}', [getEthTokenPrice(usdcPair!).toString()])
+    return getEthTokenPrice(usdcPair!)
   } else if (usdtPair !== null) {
-    log.info('getEthPriceInUSD 5 if: {}', [getUsdtTokenPrice(usdtPair!).toString()])
-    return getUsdtTokenPrice(usdtPair!)
+    log.info('getEthPriceInUSD 5 if: {}', [getEthTokenPrice(usdtPair!).toString()])
+    return getEthTokenPrice(usdtPair!)
   } else {
     log.info('getEthPriceInUSD 6 if', [])
     return ZERO_BD

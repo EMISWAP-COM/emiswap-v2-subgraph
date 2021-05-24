@@ -12,8 +12,6 @@ import {
   fetchTokenDecimals,
   fetchTokenTotalSupply
 } from './helpers'
-import {BigDecimal} from "@graphprotocol/graph-ts/index";
-import { findEthPerToken, geUsdPerToken } from './pricing'
 
 export function handleNewPair(event: Deployed): void {
   // load factory (create if first exchange)
