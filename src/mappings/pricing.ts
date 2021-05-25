@@ -33,7 +33,6 @@ export function getEthPriceInUSD(): BigDecimal {
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    log.info('getEthPriceInUSD 1 if: {}', [totalLiquidityETH.toString()])
     return getEthTokenPrice(daiPair!)
         .times(daiWeight)
         .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
@@ -42,22 +41,17 @@ export function getEthPriceInUSD(): BigDecimal {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    log.info('getEthPriceInUSD 2 if: {}', [totalLiquidityETH.toString()])
     return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
   } else if (daiPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdtPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    log.info('getEthPriceInUSD 3 if: {}', [totalLiquidityETH.toString()])
     return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
   } else if (usdcPair !== null) {
-    log.info('getEthPriceInUSD 4 if: {}', [getEthTokenPrice(usdcPair!).toString()])
     return getEthTokenPrice(usdcPair!)
   } else if (usdtPair !== null) {
-    log.info('getEthPriceInUSD 5 if: {}', [getEthTokenPrice(usdtPair!).toString()])
     return getEthTokenPrice(usdtPair!)
   } else {
-    log.info('getEthPriceInUSD 6 if', [])
     return ZERO_BD
   }
 }

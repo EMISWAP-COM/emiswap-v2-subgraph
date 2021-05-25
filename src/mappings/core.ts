@@ -180,7 +180,8 @@ export function handleTransfer(event: Transfer): void {
 
     // if accessing last one, replace it
     if (burn.needsComplete) {
-      burns[burns.length - 1] = burn.id
+      // burns[burns.length - 1] = burn.id
+      burns.push(burn.id)
     }
     // else add new one
     else {
@@ -287,6 +288,8 @@ export function handleMint(event: Deposited): void {
 }
 
 export function handleBurn(event: Withdrawn): void {
+  log.debug('handleBurn event: {}', [event.address.toString()]);
+
   let transaction = Transaction.load(event.transaction.hash.toHexString())
   let burns = transaction.burns
   let burn = Burn.load(burns[burns.length - 1])

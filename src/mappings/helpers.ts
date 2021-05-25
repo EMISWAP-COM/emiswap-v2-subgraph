@@ -308,11 +308,6 @@ export function handleSync(pairAddress: Address): void {
   emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(deltaLiquidityETH)
   emiswap.totalLiquidityUSD = emiswap.totalLiquidityUSD.plus(deltaLiquidityUSD)
 
-  log.debug('totalLiquidityETH {}, totalLiquidityUSD {}, ', [
-    emiswap.totalLiquidityETH.toString(),
-    emiswap.totalLiquidityUSD.toString()
-  ])
-
   // save entities
   pair.save()
   emiswap.save()
