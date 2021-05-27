@@ -88,6 +88,7 @@ export function handleTransfer(event: Transfer): void {
     )
     mint.pair = pair.id
     mint.to = to
+    // mint.sender = from
     mint.liquidity = value
     mint.timestamp = transaction.timestamp
     mint.amount0 = ZERO_BD
@@ -176,6 +177,8 @@ export function handleTransfer(event: Transfer): void {
     //   transaction.save()
     // }
 
+    // burn.to = event.params.to
+    // burn.sender = event.params.from
     burn.save()
 
     // if accessing last one, replace it
@@ -271,7 +274,7 @@ export function handleMint(event: Deposited): void {
   log.info('debug code=====>', [token0Amount.toString(), token1Amount.toString(), amountTotalUSD.toString()])
   /*end***** debug code*/
 
-  mint.sender = event.params.account
+  // mint.sender = event.params.account
   mint.amount0 = token0Amount as BigDecimal
   mint.amount1 = token1Amount as BigDecimal
   mint.logIndex = event.logIndex
@@ -338,7 +341,7 @@ export function handleBurn(event: Withdrawn): void {
   emiswap.save()
 
   // update burn
-  burn.sender = event.params.account
+  // burn.sender = event.params.account
   burn.amount0 = token0Amount as BigDecimal
   burn.amount1 = token1Amount as BigDecimal
   // burn.to = event.params.to
@@ -491,7 +494,7 @@ export function handleSwap(event: Swapped): void {
   }
   swap.pair = pair.id
   swap.timestamp = transaction.timestamp
-  swap.sender = event.params.account
+  // swap.sender = event.params.account
   swap.referral = event.params.referral
   swap.srcAmount = amountSrc
   swap.destAmount = amountDest
