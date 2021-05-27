@@ -1,7 +1,12 @@
 /* eslint-disable prefer-const */
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { updateEmiswapDayData, updatePairDayData, updatePairHourData, updateTokenDayData } from './dayUpdates'
-import { getTrackedLiquidityUSD, getTrackedVolumeUSD, getTrackedVolumeUsdWithEth } from './pricing'
+import {
+  getTrackedLiquidityUSD,
+  getTrackedLiquidityUsdWithEth,
+  getTrackedVolumeUSD,
+  getTrackedVolumeUsdWithEth
+} from './pricing'
 import {
   ADDRESS_ZERO,
   BI_18,
@@ -88,7 +93,7 @@ export function handleTransfer(event: Transfer): void {
     )
     mint.pair = pair.id
     mint.to = to
-    // mint.sender = from
+    mint.sender = event.params._event.transaction.from
     mint.liquidity = value
     mint.timestamp = transaction.timestamp
     mint.amount0 = ZERO_BD
@@ -119,7 +124,7 @@ export function handleTransfer(event: Transfer): void {
     burn.liquidity = value
     burn.timestamp = transaction.timestamp
     burn.to = event.params.to
-    burn.sender = event.params.from
+    burn.sender = event.params._event.transaction.from
     burn.needsComplete = true
     burn.save()
     burns.push(burn.id)
@@ -177,8 +182,8 @@ export function handleTransfer(event: Transfer): void {
     //   transaction.save()
     // }
 
-    // burn.to = event.params.to
-    // burn.sender = event.params.from
+    burn.to = event.params.to
+    burn.sender = event.params._event.transaction.from
     burn.save()
 
     // if accessing last one, replace it
@@ -252,12 +257,9 @@ export function handleMint(event: Deposited): void {
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   if (bundle.ethPrice.equals(ZERO_BD)) {
-    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, tokenETH as Token, token1Amount, tokenStable as Token)
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, tokenETH, token1Amount, tokenStable)
   } else {
-    amountTotalUSD = tokenStable.derivedETH
-      .times(token1Amount)
-      .plus(tokenETH.derivedETH.times(token0Amount))
-      .times(bundle.ethPrice)
+    amountTotalUSD = getTrackedLiquidityUsdWithEth(token0Amount, tokenETH, token1Amount, tokenStable)
   }
 
   // update txn counts
@@ -274,7 +276,7 @@ export function handleMint(event: Deposited): void {
   log.info('debug code=====>', [token0Amount.toString(), token1Amount.toString(), amountTotalUSD.toString()])
   /*end***** debug code*/
 
-  // mint.sender = event.params.account
+  mint.sender = event.params._event.transaction.from
   mint.amount0 = token0Amount as BigDecimal
   mint.amount1 = token1Amount as BigDecimal
   mint.logIndex = event.logIndex
@@ -322,12 +324,9 @@ export function handleBurn(event: Withdrawn): void {
   // get new amounts of USD and ETH for tracking
   let bundle = Bundle.load('1')
   if (bundle.ethPrice.equals(ZERO_BD)) {
-    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, tokenETH as Token, token1Amount, tokenStable as Token)
+    amountTotalUSD = getTrackedLiquidityUSD(token0Amount, tokenETH, token1Amount, tokenStable)
   } else {
-    amountTotalUSD = tokenStable.derivedETH
-      .times(token1Amount)
-      .plus(tokenETH.derivedETH.times(token0Amount))
-      .times(bundle.ethPrice)
+    amountTotalUSD = getTrackedLiquidityUsdWithEth(token0Amount, tokenETH, token1Amount, tokenStable)
   }
 
   // update txn counts
@@ -341,10 +340,10 @@ export function handleBurn(event: Withdrawn): void {
   emiswap.save()
 
   // update burn
-  // burn.sender = event.params.account
   burn.amount0 = token0Amount as BigDecimal
   burn.amount1 = token1Amount as BigDecimal
   // burn.to = event.params.to
+  burn.sender = event.params._event.transaction.from
   burn.logIndex = event.logIndex
   burn.amountUSD = amountTotalUSD as BigDecimal
   burn.save()
@@ -494,7 +493,7 @@ export function handleSwap(event: Swapped): void {
   }
   swap.pair = pair.id
   swap.timestamp = transaction.timestamp
-  // swap.sender = event.params.account
+  swap.sender = event.params._event.transaction.from
   swap.referral = event.params.referral
   swap.srcAmount = amountSrc
   swap.destAmount = amountDest
