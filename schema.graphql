@@ -1,4 +1,4 @@
-type MooniswapFactory @entity {
+type EmiswapFactory @entity {
   # factory address
   id: ID!
 
@@ -45,6 +45,7 @@ type Token @entity {
 
   # derived prices
   derivedETH: BigDecimal
+  derivedUSD: BigDecimal
 
   # address of weth exchange if exists
   allPairs: [Pair!]
@@ -56,7 +57,7 @@ type Token @entity {
 type Pair @entity {
   # pair address
   id: ID!
-  factory: MooniswapFactory! @derivedFrom(field: "pairs")
+  factory: EmiswapFactory! @derivedFrom(field: "pairs")
 
   # mirrored from the smart contract
   token0: Token!
@@ -201,8 +202,8 @@ type Bundle @entity {
   # daiPrice: BigDecimal! # price of ETH in DAI
 }
 
-# Data accumulated and condensed into day stats for all of Mooniswap
-type MooniswapDayData @entity {
+# Data accumulated and condensed into day stats for all of Emiswap
+type EmiswapDayData @entity {
   id: ID! # timestamp rounded to current day by dividing by 86400
   date: Int!
 

@@ -4,13 +4,19 @@ import { ERC20 } from '../types/Factory/ERC20'
 import { ERC20 as ERC20Telmplate } from '../types/templates/Pair/ERC20'
 import { ERC20SymbolBytes } from '../types/Factory/ERC20SymbolBytes'
 import { ERC20NameBytes } from '../types/Factory/ERC20NameBytes'
-import { Bundle, LiquidityPosition, MooniswapFactory, Pair, Token, User } from '../types/schema'
+import { Bundle, EmiswapFactory, LiquidityPosition, Pair, Token, User } from '../types/schema'
 import { Factory as FactoryContract } from '../types/templates/Pair/Factory'
-import { findEthPerToken, getEthPriceInUSD, getTrackedLiquidityUSD } from './pricing'
+import {
+  findEthPerToken,
+  getEthPriceInUSD,
+  getTrackedLiquidityUSD,
+  getTrackedLiquidityUsdWithEth,
+  geUsdPerToken
+} from './pricing'
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
-export const FACTORY_ADDRESS = '0x54F3282EEC0A18d5a07bb72bad8a5ea00026c0B1'
+export const FACTORY_ADDRESS = '0x1771dff85160768255F0a44D20965665806cBf48'
 export const ETH_BALANCE_CONTRACT = '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
 
 export let ZERO_BI = BigInt.fromI32(0)
@@ -57,6 +63,44 @@ export function equalToZero(value: BigDecimal): boolean {
 
 export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
+}
+
+export class TokensMap {
+  tokenETH: Token
+  tokenStable: Token
+}
+
+export function getTokensMap(pair: Pair | null): TokensMap {
+  if (true || pair.token0 === ETH_ADDRESS) {
+    return {
+      tokenETH: Token.load(pair.token0) as Token,
+      tokenStable: Token.load(pair.token1) as Token
+    }
+  } else {
+    return {
+      tokenETH: Token.load(pair.token1) as Token,
+      tokenStable: Token.load(pair.token0) as Token
+    }
+  }
+}
+
+export class ReservesMap {
+  reserveETH: BigDecimal
+  reserveStable: BigDecimal
+}
+
+export function getReservesMap(pair: Pair | null): ReservesMap {
+  if (pair.reserve1.gt(pair.reserve0)) {
+    return {
+      reserveETH: pair.reserve0,
+      reserveStable: pair.reserve1
+    }
+  } else {
+    return {
+      reserveETH: pair.reserve1,
+      reserveStable: pair.reserve0
+    }
+  }
 }
 
 export function fetchTokenSymbol(tokenAddress: Address): string {
@@ -156,7 +200,9 @@ export function createLiquidityPosition(exchange: Address, user: Address): Liqui
     liquidityTokenBalance.user = user.toHexString()
     liquidityTokenBalance.save()
   }
-  if (liquidityTokenBalance == null) log.error('LiquidityTokenBalance is null', [id])
+  if (liquidityTokenBalance == null) {
+    log.error('LiquidityTokenBalance is null', [id])
+  }
   return liquidityTokenBalance as LiquidityPosition
 }
 
@@ -191,11 +237,11 @@ export function handleSync(pairAddress: Address): void {
   let pair = Pair.load(pairAddress.toHex())
   let token0 = Token.load(pair.token0)
   let token1 = Token.load(pair.token1)
-  let mooniswap = MooniswapFactory.load(FACTORY_ADDRESS)
+  let emiswap = EmiswapFactory.load(FACTORY_ADDRESS)
   let reserves = fetchReserves(pair.id)
 
   // reset factory liquidity by subtracting only tracked liquidity
-  mooniswap.totalLiquidityETH = mooniswap.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
+  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.minus(pair.trackedReserveETH as BigDecimal)
 
   pair.reserve0 = convertTokenToDecimal(reserves[0], token0.decimals)
   pair.reserve1 = convertTokenToDecimal(reserves[1], token1.decimals)
@@ -208,38 +254,66 @@ export function handleSync(pairAddress: Address): void {
   bundle.ethPrice = getEthPriceInUSD()
   bundle.save()
 
+  // log.debug('bundle.ethPrice: {}', [bundle.ethPrice.toString()])
+
   token0.derivedETH = findEthPerToken(token0 as Token, false)
   token1.derivedETH = findEthPerToken(token1 as Token, false)
+  token0.derivedUSD = geUsdPerToken(pair as Pair, token0 as Token)
+  token1.derivedUSD = geUsdPerToken(pair as Pair, token1 as Token)
   token0.save()
   token1.save()
 
   // get tracked liquidity - will be 0 if neither is in whitelist
   let trackedLiquidityETH: BigDecimal
+  let trackedLiquidityUSD: BigDecimal
+
+  // let tokensMap = getTokensMap(pair);
+  let tokenETH = token0 as Token; // tokensMap.tokenETH;
+  let tokenStable = token1 as Token; // tokensMap.tokenStable;
+
+  // let reservesMap = getReservesMap(pair);
+  let reserveETH = pair.reserve0; // reservesMap.reserveETH;
+  let reserveStable = pair.reserve1; // reservesMap.reserveStable;
+
+  trackedLiquidityUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+
   if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityETH = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token).div(
-      bundle.ethPrice
-    )
+    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(reserveETH, tokenETH, reserveStable, tokenStable)
+    trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
   }
 
+  let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
+    ? trackedLiquidityETH.minus(pair.reserveETH.times(bundle.ethPrice))
+    : ZERO_BD 
+
+  let deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
+    ? trackedLiquidityUSD.minus(pair.reserveUSD)
+    : ZERO_BD
+
   // use derived amounts within pair
   pair.trackedReserveETH = trackedLiquidityETH
-  pair.reserveETH = pair.reserve0
-    .times(token0.derivedETH as BigDecimal)
-    .plus(pair.reserve1.times(token1.derivedETH as BigDecimal))
-  pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
+  pair.reserveETH = reserveETH
+    .times(tokenETH.derivedETH as BigDecimal)
+    .plus(reserveStable.times(tokenStable.derivedETH as BigDecimal))
+
+  if (trackedLiquidityUSD.notEqual(ZERO_BD)) {
+    pair.reserveUSD = trackedLiquidityUSD
+  } else {
+    pair.reserveUSD = pair.reserveETH.times(bundle.ethPrice)
+  }
 
   // use tracked amounts globally
-  mooniswap.totalLiquidityETH = mooniswap.totalLiquidityETH.plus(trackedLiquidityETH)
-  mooniswap.totalLiquidityUSD = mooniswap.totalLiquidityETH.times(bundle.ethPrice)
+  emiswap.totalLiquidityETH = emiswap.totalLiquidityETH.plus(deltaLiquidityETH)
+  emiswap.totalLiquidityUSD = emiswap.totalLiquidityUSD.plus(deltaLiquidityUSD)
 
   // save entities
   pair.save()
-  mooniswap.save()
+  emiswap.save()
 }
 
-export function getMooniswapFee(): BigInt {
+export function getEmiswapFee(): BigInt {
   let contract = FactoryContract.bind(Address.fromString(FACTORY_ADDRESS))
   return contract.fee()
 }
