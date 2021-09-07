@@ -3,7 +3,8 @@ import { Bundle, Pair, Token } from '../types/schema'
 import {Address, BigDecimal, log, Value} from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-export const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
+export const ETH_ADDRESS = KCS_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
 export const DAI_ETH_PAIR = '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
 export const USDT_ETH_PAIR = '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
 
@@ -114,6 +115,7 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
 let WHITELIST: string[] = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
    ETH_ADDRESS, // ETH
+  '0x4446fc4eb47f2f6586f9faab68b3498f86c07521', // WKCS
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
   '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', // CHI
   '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI

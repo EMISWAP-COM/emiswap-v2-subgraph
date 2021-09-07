@@ -9,6 +9,7 @@
     "auth": "graph auth https://api.thegraph.com/deploy/ 6e069d9a5c8841e8904b0ec4424e5dad",
     "deploy": "graph deploy lombardi22/emiswap8 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy2": "graph deploy kiselevmaxim/emiswap1 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "create-kcc": "graph create emiswap/emiswap1 --node https://thegraph.kcc.network/deploy",
     "deploy-kcc": "graph deploy emiswap/emiswap1 --ipfs https://thegraph.kcc.network/ipfs/ --node https://thegraph.kcc.network/deploy/ --debug",
     "allin2": "graph codegen --output-dir src/types/ && graph build && graph deploy kiselevmaxim/emiswap4 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-local": "graph create EMISWAP-COM/emiswap-subgraph --node http://localhost:8020",

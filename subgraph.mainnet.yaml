@@ -8,9 +8,9 @@ dataSources:
     name: Factory
     network: mainnet
     source:
-      address: '0x945316F2964ef5C6C84921b435a528DD1790E93a'
+      address: '0x1771dff85160768255f0a44d20965665806cbf48'
       abi: Factory
-      startBlock: 701647
+      startBlock: 1707451
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
