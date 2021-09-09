@@ -284,6 +284,11 @@ export function handleSync(pairAddress: Address): void {
     trackedLiquidityETH = ZERO_BD
   }
 
+  // if (trackedLiquidityUSD.equals(ZERO_BD)) {
+    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
+    trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
+  // }
+
   let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
     ? trackedLiquidityETH.minus(pair.reserveETH.times(bundle.ethPrice))
     : ZERO_BD 

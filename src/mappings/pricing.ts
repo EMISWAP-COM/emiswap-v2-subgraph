@@ -5,10 +5,10 @@ import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
 export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
 export const ETH_ADDRESS = KCS_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
-export const DAI_ETH_PAIR = '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
-export const USDT_ETH_PAIR = '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
 
-export const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
+export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055' // '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
+export const USDT_ETH_PAIR = '0xaca93dc131fd962e82b09aa7a66d193b8ccbb860' // '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
+export const USDC_ETH_PAIR =  '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430' // '0x61bb2fda13600c497272a8dd029313afdb125fd3'
 
 export function getEthTokenPrice(pair: Pair): BigDecimal {
   return pair.token1Price.gt(pair.token0Price)
@@ -119,21 +119,24 @@ let WHITELIST: string[] = [
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
   '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', // CHI
   '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
-  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-  '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+  '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430', // '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+  '0x0039f574ee5cc39bdd162e9a88e3eb1f111baf48', // '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
   '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
   '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
   '0x39aa39c021dfbae8fac545936693ac917d5e7563', // cUSDC
   '0x86fadb80d8d2cff3c3680819e4da99c10232ba0f', // EBASE
   '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // sUSD
   '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', // MKR
-  '0xc00e94cb662c3520282e6f5717214004a7f26888' // COMP
+  '0xc00e94cb662c3520282e6f5717214004a7f26888', // COMP
+  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
+  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // Koffee
+  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
 ]
 
 let USD_LIST: string[] = [
   '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
-  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-  '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+  '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430', // '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+  '0x0039f574ee5cc39bdd162e9a88e3eb1f111baf48', // '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
 ];
 
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
@@ -224,6 +227,8 @@ export function getTrackedLiquidityUsdWithEth(
   let bundle = Bundle.load('1')
   let price0 = token0.derivedETH.times(bundle.ethPrice)
   let price1 = token1.derivedETH.times(bundle.ethPrice)
+
+  return tokenAmount0.times(price0).plus(tokenAmount1.times(price1))
 
   // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
