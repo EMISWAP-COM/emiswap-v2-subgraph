@@ -108,7 +108,11 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
       }
     }
   }
-  return ZERO_BD /** @todo may want to return null */
+
+  let usdtPair = Pair.load(USDT_ETH_PAIR)
+  return getEthTokenPrice(usdtPair!)
+
+  // return ZERO_BD
 }
 
 // token where amounts should contribute to tracked volume and liquidity
@@ -129,7 +133,7 @@ let WHITELIST: string[] = [
   '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', // MKR
   '0xc00e94cb662c3520282e6f5717214004a7f26888', // COMP
   '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
-  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // Koffee
+  '0xc0ffee0000921eb8dd7d506d4de8d5b79b856157', // Koffee
   '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
 ]
 
@@ -227,8 +231,6 @@ export function getTrackedLiquidityUsdWithEth(
   let bundle = Bundle.load('1')
   let price0 = token0.derivedETH.times(bundle.ethPrice)
   let price1 = token1.derivedETH.times(bundle.ethPrice)
-
-  return tokenAmount0.times(price0).plus(tokenAmount1.times(price1))
 
   // both are whitelist tokens, take average of both amounts
   if (WHITELIST.includes(token0.id) && WHITELIST.includes(token1.id)) {
