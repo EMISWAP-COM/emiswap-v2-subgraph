@@ -109,10 +109,10 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
     }
   }
 
-  let usdtPair = Pair.load(USDT_ETH_PAIR)
-  return getEthTokenPrice(usdtPair!)
+  // let usdtPair = Pair.load(USDT_ETH_PAIR)
+  // return getEthTokenPrice(usdtPair!)
 
-  // return ZERO_BD
+  return ZERO_BD
 }
 
 // token where amounts should contribute to tracked volume and liquidity

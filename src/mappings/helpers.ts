@@ -284,9 +284,9 @@ export function handleSync(pairAddress: Address): void {
     trackedLiquidityETH = ZERO_BD
   }
 
-  if (trackedLiquidityUSD.equals(ZERO_BD)) {
-    const token0USD = token0.derivedETH.times(bundle.ethPrice);
-    const token1USD = token1.derivedETH.times(bundle.ethPrice);
+  if (trackedLiquidityUSD.equals(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
+    let token0USD = token0.derivedETH.times(bundle.ethPrice);
+    let token1USD = token1.derivedETH.times(bundle.ethPrice);
     trackedLiquidityUSD = token0USD.plus(token1USD);
     trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   }
