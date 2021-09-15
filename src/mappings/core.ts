@@ -397,6 +397,10 @@ export function handleSwap(event: Swapped): void {
     trackedAmountUSD = getTrackedVolumeUsdWithEth(amount0, tokenETH as Token, amount1, tokenStable as Token)
   }
 
+  let volume0 = amount0.times(tokenETH.derivedETH as BigDecimal).times(bundle.ethPrice);
+  let volume1 = amount1.times(tokenStable.derivedETH as BigDecimal).times(bundle.ethPrice);
+  trackedAmountUSD = volume0.plus(volume1);
+
   let trackedAmountETH: BigDecimal
   if (bundle.ethPrice.equals(ZERO_BD)) {
     trackedAmountETH = ZERO_BD
@@ -534,7 +538,6 @@ export function handleSwap(event: Swapped): void {
   swaps.push(swap.id)
   transaction.swaps = swaps
   transaction.save()
-
 
   handleSync(Address.fromString(pair.id))
   // update day entities
