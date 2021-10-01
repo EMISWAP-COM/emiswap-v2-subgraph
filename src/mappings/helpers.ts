@@ -16,8 +16,8 @@ import {
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
-export const FACTORY_ADDRESS = '0x945316F2964ef5C6C84921b435a528DD1790E93a' // '0x1771dff85160768255F0a44D20965665806cBf48'
-export const ETH_BALANCE_CONTRACT = '0xa92462214637371cb3d6e0d5a8180e656157c845' // '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
+export const FACTORY_ADDRESS = '0x23c1b313152e276e0CF61665dc3AC160b3c5aB19' // '0x1771dff85160768255F0a44D20965665806cBf48'
+export const ETH_BALANCE_CONTRACT = '0xc2fe71e23Ae5A508d1E6039aF282Ba19122C26C6' // '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
 
 export let ZERO_BI = BigInt.fromI32(0)
 export let ONE_BI = BigInt.fromI32(1)
@@ -293,7 +293,7 @@ export function handleSync(pairAddress: Address): void {
 
   let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
     ? trackedLiquidityETH.minus(pair.reserveETH.times(bundle.ethPrice))
-    : ZERO_BD 
+    : ZERO_BD
 
   let deltaLiquidityUSD = trackedLiquidityUSD.notEqual(ZERO_BD)
     ? trackedLiquidityUSD.minus(pair.reserveUSD)
