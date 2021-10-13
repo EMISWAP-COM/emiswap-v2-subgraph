@@ -3,29 +3,38 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
-export const MATIC_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'; // WMATIC
-export const ETH_ADDRESS = MATIC_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+export const ETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' // (WETH)
+export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521' // WKCS
+export const MATIC_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270' // WMATIC
+export const AWAX_ADDRESS = '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7' // WAVAX
+
+export const CUR_ADDRESS = AWAX_ADDRESS
+
+export const DAI_ETH_PAIR = '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
+export const USDT_ETH_PAIR = '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
+export const USDC_ETH_PAIR = '0x61bb2fda13600c497272a8dd029313afdb125fd3' // created 10634677
 
 export const WMATIC_USDT = '0x9c263902F5C34CefB81E4916148C4FcB68F4674D'
 export const WMATIC_ESW = '0x214CE506B042e55999daC132416bFBC952C5388c'
 
-export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055' // '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
-export const USDT_ETH_PAIR = WMATIC_USDT // '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
-export const USDC_ETH_PAIR = '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430'; // '0x61bb2fda13600c497272a8dd029313afdb125fd3'
+export const WAVAX_DAI_USDT = '0xB983e6cB5860E813869FaAA9a74A449872cA02d7';
+
+export const DAI_CUR_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055'
+export const USDT_CUR_PAIR = WAVAX_DAI_USDT
+export const USDC_CUR_PAIR = '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430'
 
 export function getEthTokenPrice(pair: Pair): BigDecimal {
   return pair.token1Price.gt(pair.token0Price)
     ? pair.token1Price
-    : pair.token0Price;
+    : pair.token0Price
 }
 
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
-  let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
-  let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
-  let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
+  let daiPair = Pair.load(DAI_CUR_PAIR) // dai is token1
+  let usdcPair = Pair.load(USDC_CUR_PAIR) // usdc is token1
+  let usdtPair = Pair.load(USDT_CUR_PAIR) // usdt is token1
 
   /*log.debug('getEthPriceInUSD pairs: daiPair {}, usdcPair {}, usdtPair {}', [
     daiPair !== null ? 'true' : 'false',
@@ -39,9 +48,9 @@ export function getEthPriceInUSD(): BigDecimal {
     let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
     let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
     return getEthTokenPrice(daiPair!)
-        .times(daiWeight)
-        .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
-        .plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
+      .times(daiWeight)
+      .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
+      .plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
   } else if (daiPair !== null && usdcPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
     let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
@@ -66,7 +75,7 @@ export function getEthPriceInUSD(): BigDecimal {
  * @todo update to be derived ETH (add stablecoin estimates)
  **/
 export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDecimal {
-  let tokenEthPair = factoryContract.pools(Address.fromString(token.id), Address.fromString(ETH_ADDRESS))
+  let tokenEthPair = factoryContract.pools(Address.fromString(token.id), Address.fromString(CUR_ADDRESS))
 
   if (tokenEthPair.toHexString() != ADDRESS_ZERO) {
     let ethPair = Pair.load(tokenEthPair.toHexString())
@@ -122,9 +131,10 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-   ETH_ADDRESS, // ETH
+  CUR_ADDRESS, // ETH
   '0x4446fc4eb47f2f6586f9faab68b3498f86c07521', // WKCS
   '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', // WMATIC
+  AWAX_ADDRESS,
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
   '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', // CHI
   '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
@@ -141,13 +151,17 @@ let WHITELIST: string[] = [
   '0xc0ffee0000921eb8dd7d506d4de8d5b79b856157', // Koffee
   '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
   '0xd2a2a353d28e4833faffc882f6649c9c884a7d8f', // ESW
+  '0xd586E7F844cEa2F87f50152665BCbc2C279D8d70', // AVAX DAI
+  '0xc7198437980c041c805A1EDcbA50c1Ce5db95118', // AVAX USDT
 ]
 
 let USD_LIST: string[] = [
   '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
   '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
   '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-];
+  '0xd586E7F844cEa2F87f50152665BCbc2C279D8d70', // AVAX DAI
+  '0xc7198437980c041c805A1EDcbA50c1Ce5db95118', // AVAX USDT
+]
 
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
@@ -258,10 +272,10 @@ export function getTrackedLiquidityUsdWithEth(
 }
 
 export function getTrackedVolumeUSD(
-    tokenAmount0: BigDecimal,
-    token0: Token,
-    tokenAmount1: BigDecimal,
-    token1: Token
+  tokenAmount0: BigDecimal,
+  token0: Token,
+  tokenAmount1: BigDecimal,
+  token1: Token
 ): BigDecimal {
 
   /*let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
@@ -306,10 +320,10 @@ export function getTrackedVolumeUSD(
 }
 
 export function getTrackedLiquidityUSD(
-    tokenAmount0: BigDecimal,
-    token0: Token,
-    tokenAmount1: BigDecimal,
-    token1: Token
+  tokenAmount0: BigDecimal,
+  token0: Token,
+  tokenAmount1: BigDecimal,
+  token1: Token
 ): BigDecimal {
 
   if (USD_LIST.includes(token0.id) && USD_LIST.includes(token1.id)) {

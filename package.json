@@ -10,6 +10,7 @@
     "create": "graph create lombardi22/polygon --node https://api.thegraph.com/deploy/",
     "deploy": "graph deploy lombardi22/emiswap8 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-polygon": "graph deploy lombardi22/polygon --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-avalanche": "graph deploy lombardi22/avalanche --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-kcc": "graph create emiswap/emiswap1 --node https://thegraph.kcc.network/deploy",
     "deploy-kcc": "graph deploy emiswap/emiswap1 --ipfs https://thegraph.kcc.network/ipfs/ --node https://thegraph.kcc.network/deploy/ --debug",
     "allin2": "graph codegen --output-dir src/types/ && graph build && graph deploy kiselevmaxim/emiswap4 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
