@@ -1,4 +1,3 @@
-/* eslint-disable prefer-const */
 import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
@@ -7,8 +6,8 @@ export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
 export const MATIC_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'; // WMATIC
 export const ETH_ADDRESS = MATIC_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
 
-export const WMATIC_USDT = '0x9c263902F5C34CefB81E4916148C4FcB68F4674D'
-export const WMATIC_ESW = '0x214CE506B042e55999daC132416bFBC952C5388c'
+export const WMATIC_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d'
+export const WMATIC_ESW = '0x214ce506b042e55999dac132416bfbc952c5388c'
 
 export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055' // '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
 export const USDT_ETH_PAIR = WMATIC_USDT // '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
@@ -23,15 +22,11 @@ export function getEthTokenPrice(pair: Pair): BigDecimal {
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
+  return BigDecimal.fromString('1.05');
+
   let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
   let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
-
-  /*log.debug('getEthPriceInUSD pairs: daiPair {}, usdcPair {}, usdtPair {}', [
-    daiPair !== null ? 'true' : 'false',
-    usdcPair !== null ? 'true' : 'false',
-    usdtPair !== null ? 'true' : 'false'
-  ]);*/
 
   if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
     let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
