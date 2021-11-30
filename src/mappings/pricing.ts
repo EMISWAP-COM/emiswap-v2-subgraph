@@ -22,7 +22,7 @@ export function getEthTokenPrice(pair: Pair): BigDecimal {
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
-  return BigDecimal.fromString('1.05');
+  // return BigDecimal.fromString('1.05');
 
   let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1

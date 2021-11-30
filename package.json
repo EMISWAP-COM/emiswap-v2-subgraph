@@ -6,8 +6,8 @@
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "auth": "graph auth https://api.thegraph.com/deploy/ 6e069d9a5c8841e8904b0ec4424e5dad",
-    "create": "graph create lombardi22/polygon --node https://api.thegraph.com/deploy/",
+    "auth": "graph auth https://api.thegraph.com/deploy/ 964142268d2d45af836f296d381b2099",
+    "create": "graph create lombardi22/polygon2 --node https://api.thegraph.com/deploy/",
     "deploy": "graph deploy lombardi22/emiswap8 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-polygon": "graph deploy lombardi22/polygon --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-kcc": "graph create emiswap/emiswap1 --node https://thegraph.kcc.network/deploy",
