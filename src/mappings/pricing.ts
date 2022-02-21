@@ -2,20 +2,16 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
-export const MATIC_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'; // WMATIC
-export const SDN_ADDRESS = '0x0f933Dc137D21cA519ae4C7E93f87a4C8EF365Ef'; // WSDN
-export const ETH_ADDRESS = SDN_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+export const SDN_ADDRESS = '0x0f933dc137d21ca519ae4c7e93f87a4c8ef365ef'; // WSDN
+export const ETH_ADDRESS = SDN_ADDRESS;
 
-export const MATIC_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d'
-export const MATIC_ESW = '0x214ce506b042e55999dac132416bfbc952c5388c'
+// TODO: Пары
+export const SDN_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d';
+export const SDN_ESW = '0xb4BcA5955F26d2fA6B57842655d7aCf2380Ac854';
 
-export const SDN_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d' // TODO
-export const SDN_ESW = '0xb4BcA5955F26d2fA6B57842655d7aCf2380Ac854'
-
-export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055' // '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
-export const USDT_ETH_PAIR = SDN_USDT // '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
-export const USDC_ETH_PAIR = '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430'; // '0x61bb2fda13600c497272a8dd029313afdb125fd3'
+export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055';
+export const USDT_ETH_PAIR = SDN_USDT;
+export const USDC_ETH_PAIR = '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430';
 
 export function getEthTokenPrice(pair: Pair): BigDecimal {
   return pair.token1Price.gt(pair.token0Price)
@@ -26,7 +22,7 @@ export function getEthTokenPrice(pair: Pair): BigDecimal {
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
-  // return BigDecimal.fromString('1.05');
+  return BigDecimal.fromString('1.05');
 
   let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
   let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
@@ -262,7 +258,6 @@ export function getTrackedVolumeUSD(
     tokenAmount1: BigDecimal,
     token1: Token
 ): BigDecimal {
-
   /*let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
   let pair = Pair.load(pairAddress.toHexString())*/
 

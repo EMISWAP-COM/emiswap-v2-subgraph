@@ -293,7 +293,7 @@ export function handleMint(event: Deposited): void {
 }
 
 export function handleBurn(event: Withdrawn): void {
-  log.debug('handleBurn event: {}', [event.address.toString()]);
+  // log.debug('handleBurn event: {}', [event.address.toString()]);
 
   let transaction = Transaction.load(event.transaction.hash.toHexString())
   let burns = transaction.burns
