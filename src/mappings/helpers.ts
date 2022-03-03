@@ -254,7 +254,7 @@ export function handleSync(pairAddress: Address): void {
   bundle.ethPrice = getEthPriceInUSD()
   bundle.save()
 
-  // log.debug('bundle.ethPrice: {}', [bundle.ethPrice.toString()])
+  log.debug('bundle.ethPrice: {}', [bundle.ethPrice.toString()]);
 
   token0.derivedETH = findEthPerToken(token0 as Token, false)
   token1.derivedETH = findEthPerToken(token1 as Token, false)
@@ -277,19 +277,28 @@ export function handleSync(pairAddress: Address): void {
 
   trackedLiquidityUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
 
-  if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(reserveETH, tokenETH, reserveStable, tokenStable)
+  if (trackedLiquidityUSD.equals(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
+    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(reserveETH, tokenETH, reserveStable, tokenStable);
+  }
+
+  if (trackedLiquidityUSD.notEqual(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
   }
 
-  if (trackedLiquidityUSD.equals(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
+  if (trackedLiquidityUSD.equals(ZERO_BD)) {
     let token0USD = token0.derivedETH.times(bundle.ethPrice);
     let token1USD = token1.derivedETH.times(bundle.ethPrice);
     trackedLiquidityUSD = token0USD.plus(token1USD);
+  }
+
+  if (trackedLiquidityETH.equals(ZERO_BD) && trackedLiquidityUSD.notEqual(ZERO_BD)) {
     trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   }
+
+  log.debug('trackedLiquidityUSD: {}', [trackedLiquidityUSD.toString()]);
+  log.debug('trackedLiquidityETH: {}', [trackedLiquidityETH.toString()]);
 
   let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
     ? trackedLiquidityETH.minus(pair.reserveETH.times(bundle.ethPrice))
