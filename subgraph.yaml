@@ -10,6 +10,7 @@ dataSources:
     source:
       address: '0x7449314B698f918E98c76279B5570613b243eECf'
       abi: Factory
+      startBlock: 800000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3

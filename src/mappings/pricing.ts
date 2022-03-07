@@ -2,61 +2,31 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-export const KCS_ADDRESS = '0x4446fc4eb47f2f6586f9faab68b3498f86c07521'; // WKCS
-export const MATIC_ADDRESS = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'; // WMATIC
-export const SDN_ADDRESS = '0x0f933Dc137D21cA519ae4C7E93f87a4C8EF365Ef'; // WSDN
-export const ETH_ADDRESS = SDN_ADDRESS; // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // (WETH)
+export const SDN_ADDRESS = '0x0f933dc137d21ca519ae4c7e93f87a4c8ef365ef'; // WSDN
+export const ETH_ADDRESS = SDN_ADDRESS;
 
-export const MATIC_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d'
-export const MATIC_ESW = '0x214ce506b042e55999dac132416bfbc952c5388c'
+export const SDN_USDT = '0xa697769297af6848b654a1ea0cb6dd73856ef79d';
+export const SDN_USDC = '0x931e50a2a25dd3dd954f1316b0cca7114c62b1c8';
 
-export const SDN_USDT = '0x9c263902f5c34cefb81e4916148c4fcb68f4674d' // TODO
-export const SDN_ESW = '0xb4BcA5955F26d2fA6B57842655d7aCf2380Ac854'
-
-export const DAI_ETH_PAIR = '0xc9baa8cfdde8e328787e29b4b078abf2dadc2055' // '0xe2b150625e57ed27fbae3d27857953b3e1bd6eac'
-export const USDT_ETH_PAIR = SDN_USDT // '0xc02aee6e383b53b4b04dfbb9c5c76ebc2751522a'
-export const USDC_ETH_PAIR = '0x980a5afef3d17ad98635f6c5aebcbaeded3c3430'; // '0x61bb2fda13600c497272a8dd029313afdb125fd3'
+export const USDT_TOKEN = '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b';
+export const USDC_TOKEN = '0xfa9343c3897324496a05fc75abed6bac29f8a40f';
 
 export function getEthTokenPrice(pair: Pair): BigDecimal {
-  return pair.token1Price.gt(pair.token0Price)
-    ? pair.token1Price
-    : pair.token0Price;
+  return pair.token1Price;
 }
 
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
-  // return BigDecimal.fromString('1.05');
+  let usdcPair = Pair.load(SDN_USDC) // usdc is token1
+  let usdtPair = Pair.load(SDN_USDT) // usdt is token1
 
-  let daiPair = Pair.load(DAI_ETH_PAIR) // dai is token1
-  let usdcPair = Pair.load(USDC_ETH_PAIR) // usdc is token1
-  let usdtPair = Pair.load(USDT_ETH_PAIR) // usdt is token1
-
-  if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
-    let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
-    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
-    let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    return getEthTokenPrice(daiPair!)
-        .times(daiWeight)
-        .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
-        .plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
-  } else if (daiPair !== null && usdcPair !== null) {
-    let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
-    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
-    let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
-    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
-  } else if (daiPair !== null && usdtPair !== null) {
-    let totalLiquidityETH = daiPair.reserve0.plus(usdtPair.reserve0)
-    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
-    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
-    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
-  } else if (usdcPair !== null) {
+  if (usdcPair !== null) {
     return getEthTokenPrice(usdcPair!)
   } else if (usdtPair !== null) {
     return getEthTokenPrice(usdtPair!)
   } else {
-    return ZERO_BD
+    return BigDecimal.fromString('0.83');
   }
 }
 
@@ -120,33 +90,15 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-   ETH_ADDRESS, // ETH
-  '0x4446fc4eb47f2f6586f9faab68b3498f86c07521', // WKCS
-  '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', // WMATIC
-  '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
-  '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', // CHI
-  '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
-  '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-  '0x0000000000085d4780b73119b644ae5ecd22b376', // TUSD
-  '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643', // cDAI
-  '0x39aa39c021dfbae8fac545936693ac917d5e7563', // cUSDC
-  '0x86fadb80d8d2cff3c3680819e4da99c10232ba0f', // EBASE
-  '0x57ab1ec28d129707052df4df418d58a2d46d5f51', // sUSD
-  '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', // MKR
-  '0xc00e94cb662c3520282e6f5717214004a7f26888', // COMP
-  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
-  '0xc0ffee0000921eb8dd7d506d4de8d5b79b856157', // Koffee
-  '0xfc56a7e70f6c970538020cc39939929b4d393f1f', // KUST
-  '0xd2a2a353d28e4833faffc882f6649c9c884a7d8f', // ESW
+  ETH_ADDRESS, // SDN
+  USDT_TOKEN,
+  USDC_TOKEN,
 ]
 
 let USD_LIST: string[] = [
-  '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
-  '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-];
+  USDT_TOKEN,
+  USDC_TOKEN,
+]
 
 let MINIMUM_USD_THRESHOLD_NEW_PAIRS = BigDecimal.fromString('200000')
 
@@ -262,7 +214,6 @@ export function getTrackedVolumeUSD(
     tokenAmount1: BigDecimal,
     token1: Token
 ): BigDecimal {
-
   /*let pairAddress = factoryContract.pools(Address.fromString(token0.id), Address.fromString(token1.id))
   let pair = Pair.load(pairAddress.toHexString())*/
 

@@ -16,8 +16,8 @@ import {
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export let ETH_ADDRESS = ADDRESS_ZERO
-export const FACTORY_ADDRESS = '0x7449314B698f918E98c76279B5570613b243eECf' // '0x1771dff85160768255F0a44D20965665806cBf48'
-export const ETH_BALANCE_CONTRACT = '0xc2fe71e23Ae5A508d1E6039aF282Ba19122C26C6' // '0x42f527F50F16A103b6ccAb48BcCca214500c1021'
+export const FACTORY_ADDRESS = '0x979e5d41595263f6Dfec4F4D48419C555B80D95c';
+export const ETH_BALANCE_CONTRACT = '0xc2fe71e23Ae5A508d1E6039aF282Ba19122C26C6';
 
 export let ZERO_BI = BigInt.fromI32(0)
 export let ONE_BI = BigInt.fromI32(1)
@@ -277,19 +277,28 @@ export function handleSync(pairAddress: Address): void {
 
   trackedLiquidityUSD = getTrackedLiquidityUSD(pair.reserve0, token0 as Token, pair.reserve1, token1 as Token)
 
-  if (bundle.ethPrice.notEqual(ZERO_BD)) {
-    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(reserveETH, tokenETH, reserveStable, tokenStable)
+  if (trackedLiquidityUSD.equals(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
+    trackedLiquidityUSD = getTrackedLiquidityUsdWithEth(reserveETH, tokenETH, reserveStable, tokenStable);
+  }
+
+  if (trackedLiquidityUSD.notEqual(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
     trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   } else {
     trackedLiquidityETH = ZERO_BD
   }
 
-  if (trackedLiquidityUSD.equals(ZERO_BD) && bundle.ethPrice.notEqual(ZERO_BD)) {
+  if (trackedLiquidityUSD.equals(ZERO_BD)) {
     let token0USD = token0.derivedETH.times(bundle.ethPrice);
     let token1USD = token1.derivedETH.times(bundle.ethPrice);
     trackedLiquidityUSD = token0USD.plus(token1USD);
+  }
+
+  if (trackedLiquidityETH.equals(ZERO_BD) && trackedLiquidityUSD.notEqual(ZERO_BD)) {
     trackedLiquidityETH = trackedLiquidityUSD.div(bundle.ethPrice)
   }
+
+  log.debug('trackedLiquidityUSD: {}', [trackedLiquidityUSD.toString()]);
+  log.debug('trackedLiquidityETH: {}', [trackedLiquidityETH.toString()]);
 
   let deltaLiquidityETH = trackedLiquidityETH.notEqual(ZERO_BD)
     ? trackedLiquidityETH.minus(pair.reserveETH.times(bundle.ethPrice))

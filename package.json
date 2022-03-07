@@ -10,6 +10,7 @@
     "create": "graph create lombardi22/polygon2 --node https://api.thegraph.com/deploy/",
     "deploy": "graph deploy lombardi22/emiswap8 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "deploy-polygon": "graph deploy lombardi22/polygon --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
+    "deploy-aurora": "graph deploy lombardi22/aurora --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --debug",
     "create-kcc": "graph create emiswap/emiswap1 --node https://thegraph.kcc.network/deploy",
     "deploy-kcc": "graph deploy emiswap/emiswap1 --ipfs https://thegraph.kcc.network/ipfs/ --node https://thegraph.kcc.network/deploy/ --debug",
     "create-shiden": "graph create shiden --node http://10.165.101.41:8020",
