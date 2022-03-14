@@ -2,31 +2,56 @@ import { Bundle, Pair, Token } from '../types/schema'
 import { Address, BigDecimal } from '@graphprotocol/graph-ts/index'
 import { ADDRESS_ZERO, factoryContract, ZERO_BD } from './helpers'
 
-export const SDN_ADDRESS = '0x0f933dc137d21ca519ae4c7e93f87a4c8ef365ef'; // WSDN
-export const ETH_ADDRESS = SDN_ADDRESS;
+export const WETH_ADDRESS = '0xC9BdeEd33CD01541e1eeD10f90519d2C06Fe3feB';
+export const ETH_ADDRESS = WETH_ADDRESS;
 
-export const SDN_USDT = '0xa697769297af6848b654a1ea0cb6dd73856ef79d';
-export const SDN_USDC = '0x931e50a2a25dd3dd954f1316b0cca7114c62b1c8';
+export const ETH_DAI = '0xccf1d233b294018f514a2df9e781a3a888e338e6';
+export const USDT_ETH = '0xfa9b5c93c9c1bc0a3e3b44c984bcf8921cd50244';
+export const USDC_ETH = '0x231688d4cae0b09c0a8f3b275980933edbb745ae';
 
-export const USDT_TOKEN = '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b';
-export const USDC_TOKEN = '0xfa9343c3897324496a05fc75abed6bac29f8a40f';
+export const DAI_TOKEN = '0xe3520349f477a5f6eb06107066048508498a291b';
+export const USDT_TOKEN = '0x4988a896b1227218e4a686fde5eabdcabd91571f';
+export const USDC_TOKEN = '0xb12bfca5a55806aaf64e99521918a4bf0fc40802';
 
 export function getEthTokenPrice(pair: Pair): BigDecimal {
-  return pair.token1Price;
+  if (pair.token1 === DAI_TOKEN) {
+    return pair.token1Price;
+  }
+  return pair.token0Price;
 }
 
 // fetch eth prices for each stablecoin
 export function getEthPriceInUSD(): BigDecimal {
 
-  let usdcPair = Pair.load(SDN_USDC) // usdc is token1
-  let usdtPair = Pair.load(SDN_USDT) // usdt is token1
+  let daiPair = Pair.load(ETH_DAI) // dai is token1
+  let usdcPair = Pair.load(USDC_ETH) // usdc is token0
+  let usdtPair = Pair.load(USDT_ETH) // usdt is token0
 
-  if (usdcPair !== null) {
+  if (daiPair !== null && usdcPair !== null && usdtPair !== null) {
+    let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0).plus(usdtPair.reserve0)
+    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
+    let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
+    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
+    return getEthTokenPrice(daiPair!)
+        .times(daiWeight)
+        .plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
+        .plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
+  } else if (daiPair !== null && usdcPair !== null) {
+    let totalLiquidityETH = daiPair.reserve0.plus(usdcPair.reserve0)
+    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
+    let usdcWeight = usdcPair.reserve0.div(totalLiquidityETH)
+    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdcPair!).times(usdcWeight))
+  } else if (daiPair !== null && usdtPair !== null) {
+    let totalLiquidityETH = daiPair.reserve0.plus(usdtPair.reserve0)
+    let daiWeight = daiPair.reserve0.div(totalLiquidityETH)
+    let usdtWeight = usdtPair.reserve0.div(totalLiquidityETH)
+    return getEthTokenPrice(daiPair!).times(daiWeight).plus(getEthTokenPrice(usdtPair!).times(usdtWeight))
+  } else if (usdcPair !== null) {
     return getEthTokenPrice(usdcPair!)
   } else if (usdtPair !== null) {
     return getEthTokenPrice(usdtPair!)
   } else {
-    return BigDecimal.fromString('0.83');
+    return BigDecimal.fromString('2620');
   }
 }
 
@@ -90,12 +115,14 @@ export function findEthPerToken(token: Token, maxDepthReached: boolean): BigDeci
 
 // token where amounts should contribute to tracked volume and liquidity
 let WHITELIST: string[] = [
-  ETH_ADDRESS, // SDN
+  ETH_ADDRESS,
+  DAI_TOKEN,
   USDT_TOKEN,
   USDC_TOKEN,
 ]
 
 let USD_LIST: string[] = [
+  DAI_TOKEN,
   USDT_TOKEN,
   USDC_TOKEN,
 ]
